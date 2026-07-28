@@ -23,7 +23,7 @@ public class UsuarioMapper {
         dto.setEmail(usuario.getEmail());
         dto.setId(usuario.getId());
         dto.setNome(usuario.getNome());
-        dto.setDiasAcessoMês(usuario.getAcessosAcademia().getDiasAcesso());
+        dto.setDiasAcessoSemana(usuario.getAcessosAcademia().getDiasAcesso());
         dto.setRole(usuario.getRole());
 
         return dto;

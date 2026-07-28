@@ -20,7 +20,7 @@ public class AcessoAcademiaController {
     
     private final AcessoAcademiaService academiaService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Void> acessarAcademia(@Valid @RequestBody AcessoAcademiaRequestDTO dto) {
 

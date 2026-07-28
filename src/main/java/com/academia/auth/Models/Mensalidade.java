@@ -1,7 +1,7 @@
 package com.academia.auth.Models;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.academia.auth.Utils.StatusMensalidade;
 
@@ -43,12 +43,16 @@ public class Mensalidade {
     private BigDecimal valor;
 
     @Column(nullable = false)
-    private LocalDateTime dataCriacao;
+    private LocalDate dataCriacao;
 
-    private LocalDateTime dataPagamento;
+    private LocalDate dataPagamento;
+
+    private LocalDate dataCancelamento;
+
+    private Integer atualizacoes;
 
     @Column(nullable = false)
-    private LocalDateTime dataVencimento;
+    private LocalDate dataVencimento;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

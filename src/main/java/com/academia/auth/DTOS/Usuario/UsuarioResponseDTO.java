@@ -17,7 +17,7 @@ public class UsuarioResponseDTO {
 
     private String nome;
 
-    private Integer diasAcessoMês;
+    private Integer diasAcessoSemana;
 
     private String email;
 

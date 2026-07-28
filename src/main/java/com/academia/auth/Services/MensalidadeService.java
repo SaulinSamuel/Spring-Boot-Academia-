@@ -3,7 +3,6 @@ package com.academia.auth.Services;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -44,6 +43,13 @@ public class MensalidadeService {
             throw new BusinessException("Você já possui mensalidades pendentes!");
         }
 
+        LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
+        LocalDate fimMes = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+
+        if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween (usuario, inicioMes, fimMes)) {
+            throw new BusinessException("Você já cancelou uma mensalidade esse mês!");
+        }
+
         BigDecimal valor;
 
         if (dto.getDiasTreino() >= 1 && dto.getDiasTreino() <= 5) {
@@ -60,11 +66,12 @@ public class MensalidadeService {
         acessosAcademia.setDiasAcesso(0);
 
         mensalidade.setValor(valor);
-        mensalidade.setDataCriacao(LocalDateTime.now());
-        mensalidade.setDataVencimento(LocalDateTime.now().plusMonths(1));
+        mensalidade.setDataCriacao(LocalDate.now());
+        mensalidade.setDataVencimento(LocalDate.now().plusMonths(1));
         mensalidade.setUsuario(usuario);
         mensalidade.setDiasTreino(dto.getDiasTreino());
         mensalidade.setDataPagamento(null);
+        mensalidade.setAtualizacoes(0);
         mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
         mensalidadeRepository.save(mensalidade);
@@ -85,10 +92,15 @@ public class MensalidadeService {
             throw new BusinessException("Apenas mensalidades pendentes podem ser alteradas!");
         }
 
+        if (mensalidade.getAtualizacoes() >= 1) {
+            throw new BusinessException("Você só pode atualizar sua mensalidade 1 vez por mês!");
+        }
+
         BigDecimal valor = validarValorMensalidade(dto.getDiasTreino());
 
         mensalidade.setDiasTreino(dto.getDiasTreino());
         mensalidade.setValor(valor);
+        mensalidade.setAtualizacoes(1);
 
         mensalidadeRepository.save(mensalidade);
 
@@ -141,7 +153,8 @@ public class MensalidadeService {
         }
 
         mensalidade.setStatus(StatusMensalidade.PAGA);
-        mensalidade.setDataPagamento(LocalDateTime.now());
+        mensalidade.setDataPagamento(LocalDate.now());
+        mensalidade.setAtualizacoes(0);
 
         mensalidadeRepository.save(mensalidade);
         
@@ -153,7 +166,7 @@ public class MensalidadeService {
     @Transactional
     public void atrasarMensalidades() {
 
-        LocalDateTime hoje = LocalDateTime.now();
+        LocalDate hoje = LocalDate.now();
 
         List<Mensalidade> mensalidadesVencidas = mensalidadeRepository
             .findByStatusAndDataVencimentoBefore(StatusMensalidade.PENDENTE, hoje);
@@ -178,6 +191,7 @@ public class MensalidadeService {
         }
 
         mensalidade.setStatus(StatusMensalidade.CANCELADA);
+        mensalidade.setDataCancelamento(LocalDate.now());
 
         mensalidadeRepository.save(mensalidade);
 
@@ -210,7 +224,7 @@ public class MensalidadeService {
 
         Mensalidade mensalidadeNova = new Mensalidade();
 
-        mensalidadeNova.setDataCriacao(LocalDateTime.now());
+        mensalidadeNova.setDataCriacao(LocalDate.now());
         mensalidadeNova.setDataPagamento(null);
         mensalidadeNova.setDataVencimento(mensalidade.getDataVencimento().plusMonths(1));
         mensalidadeNova.setDiasTreino(mensalidade.getDiasTreino());

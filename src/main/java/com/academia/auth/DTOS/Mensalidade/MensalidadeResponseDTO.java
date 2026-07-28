@@ -1,7 +1,7 @@
 package com.academia.auth.DTOS.Mensalidade;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.academia.auth.Utils.StatusMensalidade;
 
@@ -26,9 +26,9 @@ public class MensalidadeResponseDTO {
 
     private StatusMensalidade status;
 
-    private LocalDateTime dataPagamento;
+    private LocalDate dataPagamento;
 
-    private LocalDateTime dataVencimento;
+    private LocalDate dataVencimento;
 
-    private LocalDateTime dataCriacao;
+    private LocalDate dataCriacao;
 }

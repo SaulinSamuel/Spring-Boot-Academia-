@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.academia.auth.DTOS.AcessoAcademia.AcessoAcademiaRequestDTO;
+import com.academia.auth.Exceptions.AcessoAcademiaException;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Models.AcessoAcademia;
@@ -15,6 +16,7 @@ import com.academia.auth.Models.Usuario;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.Utils.StatusMensalidade;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,10 +43,18 @@ public class AcessoAcademiaService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
+        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
+            throw new AcessoAcademiaException("Mensalidade em atraso ou cancelada!");
+        }
+
         AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
 
         LocalDate hoje = LocalDate.now();
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
+
+        if (hoje.isEqual(hoje.with(DayOfWeek.SATURDAY)) || hoje.isEqual(hoje.with(DayOfWeek.SUNDAY))) {
+            throw new AcessoAcademiaException("Academia não é aberta aos sábados e domingos!");
+        }
 
         if (!inicioSemana.equals(acessoAcademia.getInicioSemana())) {
             acessoAcademia.setInicioSemana(inicioSemana);
@@ -52,11 +62,11 @@ public class AcessoAcademiaService {
         }   
 
         if (LocalDate.now().equals(acessoAcademia.getUltimoAcesso())) {
-            throw new BusinessException("Você já acessou a academia hoje!");
+            throw new AcessoAcademiaException("Você já acessou a academia hoje!");
         }
 
         if (acessoAcademia.getDiasAcesso() >= mensalidade.getDiasTreino()) {
-            throw new BusinessException("Máximo de dias de treino na semana atingidos!");
+            throw new AcessoAcademiaException("Máximo de dias de treino na semana atingidos!");
         }
 
         acessoAcademia.setUltimoAcesso(hoje);

@@ -24,9 +24,10 @@ import com.academia.auth.Utils.StatusMensalidade;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
-
 @Service
 public class MensalidadeService {
     
@@ -39,6 +40,8 @@ public class MensalidadeService {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
+        log.info("Criando mensalidade para usuário{}", usuario.getEmail());
+
         if(mensalidadeRepository.existsByStatus(StatusMensalidade.PENDENTE)) {
             throw new BusinessException("Você já possui mensalidades pendentes!");
         }
@@ -47,16 +50,11 @@ public class MensalidadeService {
         LocalDate fimMes = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
 
         if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween (usuario, inicioMes, fimMes)) {
+            log.warn("Usuário {} tentou cancelar mais de uma mensalidade no mês.", usuario.getEmail());
             throw new BusinessException("Você já cancelou uma mensalidade esse mês!");
         }
 
-        BigDecimal valor;
-
-        if (dto.getDiasTreino() >= 1 && dto.getDiasTreino() <= 5) {
-            valor = BigDecimal.valueOf(15).multiply(BigDecimal.valueOf(dto.getDiasTreino()));
-        } else {
-            throw new BusinessException("Máximo de dias de treino são 5!");
-        }
+        BigDecimal valor = validarValorMensalidade(dto.getDiasTreino());
 
         Mensalidade mensalidade = MensalidadeMapper.toEntity(dto);
 
@@ -77,6 +75,9 @@ public class MensalidadeService {
         mensalidadeRepository.save(mensalidade);
         academiaRepository.save(acessosAcademia);
 
+        log.info("Mensalidade criada e salva para usuário{}", usuario.getEmail());
+        log.info("Acesso da academia criado e salvo para usuário{}", usuario.getEmail());
+
         return MensalidadeMapper.toDTO(mensalidade);
     }
 
@@ -84,6 +85,7 @@ public class MensalidadeService {
     public MensalidadeResponseDTO atualizarMensalidade(MensalidadeRequestDTO dto) {
         
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em atualizar quantidade", usuario.getEmail());
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
@@ -93,6 +95,7 @@ public class MensalidadeService {
         }
 
         if (mensalidade.getAtualizacoes() >= 1) {
+            log.info("Usuário {} tentou atualizar mensalidade mais de uma vez no mês", usuario.getEmail());
             throw new BusinessException("Você só pode atualizar sua mensalidade 1 vez por mês!");
         }
 
@@ -103,6 +106,7 @@ public class MensalidadeService {
         mensalidade.setAtualizacoes(1);
 
         mensalidadeRepository.save(mensalidade);
+        log.info("Mensalidade do usuário {} atualizada!", usuario.getEmail());
 
         return MensalidadeMapper.toDTO(mensalidade);
     }
@@ -110,12 +114,15 @@ public class MensalidadeService {
     public Page<MensalidadeResponseDTO> buscarSuasMensalidades(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} tentou buscar suas mensalidades", usuario.getEmail());
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAllByUsuario(usuario, pageable);
 
         if (mensalidades.isEmpty()) {
             throw new ResourceNotFound("Mensalidades não encontradas!");
         }
+
+        log.info("Usuário {} buscou suas mensalidades", usuario.getEmail());
 
         return mensalidades
             .map(MensalidadeMapper::toDTO);
@@ -124,8 +131,10 @@ public class MensalidadeService {
     public Page<MensalidadeResponseDTO> buscarTodasMensalidades(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Admin {} entrou em buscar todas as mensalidades", usuario.getEmail());
 
         if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
+            log.warn("Usuário {} tentou entrar sem permissão em método buscarTodasMensalidades", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para visualizar as mensalidades!");
         }
 
@@ -135,6 +144,7 @@ public class MensalidadeService {
             throw new ResourceNotFound("Mensalidades não encontradas!");
         }
 
+        log.info("Admin {} buscou todas mensalidades", usuario.getEmail());
         return mensalidades
             .map(MensalidadeMapper::toDTO);
     }
@@ -143,12 +153,14 @@ public class MensalidadeService {
     public MensalidadeResponseDTO pagarMensalidade() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em pagar mensalidade", usuario.getEmail());
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
         
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE && 
             mensalidade.getStatus() != StatusMensalidade.ATRASADA) {
+            log.warn("Usuário {} tentou pagar mensalidade {} já paga ou atrasada", usuario.getEmail(), mensalidade.getId());
             throw new BusinessException("Apenas mensalidades pendentes(ou atrasadas) podem ser pagas!");
         }
 
@@ -157,6 +169,7 @@ public class MensalidadeService {
         mensalidade.setAtualizacoes(0);
 
         mensalidadeRepository.save(mensalidade);
+        log.info("Mensalidade {} salva e paga", mensalidade.getId());
         
         gerarProximaMensalidade(mensalidade);
 
@@ -172,6 +185,7 @@ public class MensalidadeService {
             .findByStatusAndDataVencimentoBefore(StatusMensalidade.PENDENTE, hoje);
 
         for (Mensalidade mensalidade : mensalidadesVencidas) {
+            log.info("Mensalidade {} marcada como atrasada", mensalidade.getId());
             mensalidade.setStatus(StatusMensalidade.ATRASADA);
         }
 
@@ -182,6 +196,7 @@ public class MensalidadeService {
     public MensalidadeResponseDTO cancelarMensalidade() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em cancelar mensalidade", usuario.getEmail());
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
@@ -194,6 +209,7 @@ public class MensalidadeService {
         mensalidade.setDataCancelamento(LocalDate.now());
 
         mensalidadeRepository.save(mensalidade);
+        log.info("Mensalidade {} cancelada", mensalidade.getId());
 
         return MensalidadeMapper.toDTO(mensalidade);
     }
@@ -201,24 +217,29 @@ public class MensalidadeService {
     public void excluirMensalidade() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em excluir mensalidade", usuario.getEmail());
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
         mensalidade.getStatus() != StatusMensalidade.CANCELADA) {
+            log.warn("Usuário {} tentou cancelar mensalidade {} atrasada ou pendente", usuario.getEmail(), mensalidade.getId());
             throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
         }
 
         mensalidadeRepository.delete(mensalidade);
+        log.info("Mensalidade {} excluída", mensalidade.getId());
     }
 
     @Transactional
     public MensalidadeResponseDTO gerarProximaMensalidade(Mensalidade mensalidade) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Nova mensalidade de usuário {} sendo gerada", usuario.getEmail());
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA) {
+            log.warn("Mensalidade de usuário {} ainda não foi paga", usuario.getEmail());
             throw new BusinessException("Mensalidade ainda não paga!");
         }
 
@@ -233,6 +254,7 @@ public class MensalidadeService {
         mensalidadeNova.setUsuario(usuario);
 
         mensalidadeRepository.save(mensalidadeNova);
+        log.info("Nova mensalidade após pagamento de usuário {} criada", usuario.getEmail());
         
         return MensalidadeMapper.toDTO(mensalidadeNova); 
     }

@@ -28,6 +28,8 @@ public class MensalidadeResponseDTO {
 
     private LocalDate dataPagamento;
 
+    private LocalDate dataCancelamento;
+
     private LocalDate dataVencimento;
 
     private LocalDate dataCriacao;

@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +30,7 @@ public class UsuarioController {
     
     private final UsuarioService usuarioService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @PutMapping("/editar")
     public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@Valid @RequestBody UsuarioAtualizarDTO dto) {
 
@@ -37,7 +39,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @GetMapping("/listar")
     public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuarios(
         @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
@@ -47,7 +49,16 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/promover-funcionario")
+    public ResponseEntity<UsuarioResponseDTO> promoverUsuarioAFuncionario(@PathVariable Long id) {
+
+        UsuarioResponseDTO usuario = usuarioService.promoverUsuarioAFuncionario(id);
+
+        return ResponseEntity.ok(usuario);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @GetMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> meusDados() {
 
@@ -56,9 +67,9 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @DeleteMapping
-    public ResponseEntity<Void> deletarUsuario(@Valid @RequestBody UsuarioDeletarDTO dto) {
+    public ResponseEntity<Void> deletarSeuUsuario(@Valid @RequestBody UsuarioDeletarDTO dto) {
 
         usuarioService.deletarUsuario(dto);
 

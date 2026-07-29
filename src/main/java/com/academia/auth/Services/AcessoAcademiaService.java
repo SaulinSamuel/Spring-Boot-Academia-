@@ -7,12 +7,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.academia.auth.DTOS.AcessoAcademia.AcessoAcademiaRequestDTO;
+import com.academia.auth.DTOS.AcessoAcademia.AcessoAcademiaResponseDTO;
 import com.academia.auth.Exceptions.AcessoAcademiaException;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
+import com.academia.auth.Mappers.AcessoAcademiaMapper;
 import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
+import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
@@ -33,7 +36,7 @@ public class AcessoAcademiaService {
     private final MensalidadeRepository mensalidadeRepository;
 
     @Transactional
-    public void entrarAcademia(AcessoAcademiaRequestDTO dto) {
+    public AcessoAcademiaResponseDTO acessarAcademia(AcessoAcademiaRequestDTO dto) {
 
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
             .orElseThrow(() -> new ResourceNotFound("Aluno não encontrado!"));
@@ -80,6 +83,42 @@ public class AcessoAcademiaService {
 
         acessoAcademiaRepository.save(acessoAcademia);
         log.info("Usuário {} acessou a academia as {}", usuario.getEmail(), hoje);
+
+        return AcessoAcademiaMapper.toDTO(acessoAcademia);
     }
 
+    @Transactional
+    public AcessoAcademiaResponseDTO acessarAcademiaFuncionario(AcessoAcademiaRequestDTO dto) {
+
+        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
+            .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
+
+        if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
+            throw new BusinessException("Senha incorreta!");
+        }
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new AcessoAcademiaException("Apenas funcionários podem utlizar esse acesso!");
+        }
+
+        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+
+        LocalDate hoje = LocalDate.now();
+
+        if (hoje.getDayOfWeek() == DayOfWeek.SATURDAY ||
+            hoje.getDayOfWeek() == DayOfWeek.SUNDAY) {
+
+            throw new AcessoAcademiaException("A academia é fechada aos sábados e domingos!");
+        }
+        if (!acessoAcademia.getInicioSemana().equals(hoje.with(DayOfWeek.MONDAY))) {
+            acessoAcademia.setDiasAcesso(0);
+            acessoAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
+        }
+
+        acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
+        acessoAcademia.setUltimoAcesso(hoje);
+
+        acessoAcademiaRepository.save(acessoAcademia);
+
+        return AcessoAcademiaMapper.toDTO(acessoAcademia);
+    }
 }

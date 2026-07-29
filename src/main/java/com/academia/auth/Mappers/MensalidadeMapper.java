@@ -22,6 +22,7 @@ public class MensalidadeMapper {
         dto.setDataCriacao(mensalidade.getDataCriacao());
         dto.setDataVencimento(mensalidade.getDataVencimento());
         dto.setDataPagamento(mensalidade.getDataPagamento());
+        dto.setDataCancelamento(mensalidade.getDataCancelamento());
         dto.setDiasTreino(mensalidade.getDiasTreino());
         dto.setAluno(mensalidade.getUsuario().getNome());
         dto.setPreco(mensalidade.getValor());

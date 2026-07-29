@@ -22,7 +22,7 @@ public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> 
 
     boolean existsByUsuarioAndDataCancelamentoBetween(Usuario usuario, LocalDate inicioMes, LocalDate fimMes);
 
-    boolean existsByStatus(StatusMensalidade status);
+    boolean existsByUsuarioAndStatus(Usuario usuario, StatusMensalidade status);
 
     List<Mensalidade> findByStatusAndDataVencimentoBefore(StatusMensalidade status, LocalDate hoje);
 

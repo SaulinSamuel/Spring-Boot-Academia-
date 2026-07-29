@@ -29,7 +29,7 @@ public class MensalidadeController {
     
     private final MensalidadeService mensalidadeService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @PostMapping
     public ResponseEntity<MensalidadeResponseDTO> criarMensalidade(@Valid @RequestBody MensalidadeRequestDTO dto) {
 
@@ -38,7 +38,7 @@ public class MensalidadeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(mensalidade);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @PutMapping("/atualizar")
     public ResponseEntity<MensalidadeResponseDTO> atualizarMensalidade(@Valid @RequestBody MensalidadeRequestDTO dto) {
 
@@ -47,7 +47,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidade);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @GetMapping("/me")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarSuasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
 
@@ -56,7 +56,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidades);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN', 'FUNCIONARIO')")
     @GetMapping("/buscar")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
 
@@ -65,7 +65,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidades);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @PatchMapping("/pagar")
     public ResponseEntity<MensalidadeResponseDTO> pagarMensalidade() {
 
@@ -74,7 +74,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidade);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @PatchMapping("/cancelar")
     public ResponseEntity<MensalidadeResponseDTO> cancelarMensalidade() {
 
@@ -83,7 +83,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidade);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @DeleteMapping("/deletar")
     public ResponseEntity<Void> excluirMensalidade() {
 

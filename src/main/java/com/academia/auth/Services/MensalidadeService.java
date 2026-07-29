@@ -42,7 +42,7 @@ public class MensalidadeService {
 
         log.info("Criando mensalidade para usuário{}", usuario.getEmail());
 
-        if(mensalidadeRepository.existsByStatus(StatusMensalidade.PENDENTE)) {
+        if(mensalidadeRepository.existsByUsuarioAndStatus(usuario, StatusMensalidade.PENDENTE)) {
             throw new BusinessException("Você já possui mensalidades pendentes!");
         }
 
@@ -69,14 +69,15 @@ public class MensalidadeService {
         mensalidade.setUsuario(usuario);
         mensalidade.setDiasTreino(dto.getDiasTreino());
         mensalidade.setDataPagamento(null);
+        mensalidade.setDataCancelamento(null);
         mensalidade.setAtualizacoes(0);
         mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
         mensalidadeRepository.save(mensalidade);
         academiaRepository.save(acessosAcademia);
 
-        log.info("Mensalidade criada e salva para usuário{}", usuario.getEmail());
-        log.info("Acesso da academia criado e salvo para usuário{}", usuario.getEmail());
+        log.info("Mensalidade criada e salva para usuário {}", usuario.getEmail());
+        log.info("Acesso da academia criado e salvo para usuário {}", usuario.getEmail());
 
         return MensalidadeMapper.toDTO(mensalidade);
     }
@@ -230,6 +231,7 @@ public class MensalidadeService {
         return MensalidadeMapper.toDTO(mensalidade);
     }
 
+    @Transactional
     public void excluirMensalidade() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -238,13 +240,18 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
+        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
         mensalidade.getStatus() != StatusMensalidade.CANCELADA) {
+
             log.warn("Usuário {} tentou cancelar mensalidade {} atrasada ou pendente", usuario.getEmail(), mensalidade.getId());
             throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
         }
 
         mensalidadeRepository.delete(mensalidade);
+        academiaRepository.delete(acessoAcademia);
+
         log.info("Mensalidade {} excluída", mensalidade.getId());
     }
 

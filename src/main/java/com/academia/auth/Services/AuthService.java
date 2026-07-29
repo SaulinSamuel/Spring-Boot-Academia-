@@ -13,7 +13,6 @@ import com.academia.auth.Security.JwtService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-
 @Service
 public class AuthService {
     

@@ -18,9 +18,10 @@ import com.academia.auth.Repositories.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
-
 @Service
 public class UsuarioService {
     
@@ -32,6 +33,7 @@ public class UsuarioService {
     public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO dto) {
 
         if(usuarioRepository.existsByEmail(dto.getEmail())) {
+            log.warn("Tentativa de cadastro de usuário já cadastrado!");
             throw new BusinessException("Email já cadastrado!");
         }
 
@@ -40,19 +42,24 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
+        log.info("Usuário {} cadastrado com sucesso!", usuarioSalvo.getEmail());
 
         return UsuarioMapper.toDTO(usuarioSalvo);
     }
 
+    @Transactional
     public UsuarioResponseDTO atualizarUsuario(UsuarioAtualizarDTO dto) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em atualizar usuário", usuario.getEmail());
 
         if(!passwordEncoder.matches(dto.getSenhaAtual(), usuario.getSenha())) {
+            log.info("usuário {} informou sua senha incorretamente", usuario.getEmail());
             throw new BusinessException("Senha incorreta!");
         }
 
         if(usuarioRepository.existsByEmailAndIdNot(dto.getEmail(), usuario.getId())) {
+            log.warn("Usuário {} tentou cadastrar com email já existente!", usuario.getEmail());
             throw new BusinessException("Usuário já existente com esse email!");
         }
 
@@ -60,19 +67,54 @@ public class UsuarioService {
         usuario.setNome(dto.getNome());
 
         if(dto.getSenhaNova() != null) {
+            log.info("Senha do usuário {} atualizada!", usuario.getEmail());
             usuario.setSenha(passwordEncoder.encode(dto.getSenhaNova()));
         }
         
         usuarioRepository.save(usuario);
+        log.info("Usuário {} atualizado com sucesso!", usuario.getEmail());
 
         return UsuarioMapper.toDTO(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO promoverUsuarioAFuncionario(Long id) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em promover usuário a funcionário", usuario.getEmail());
+
+        if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
+            log.warn("Usuário {} tentou promover usuário {} a funcionário", usuario.getId(), id);
+            throw new BusinessException("Você não tem permissão para promover usuário a funcionário!");
+        }
+
+        Usuario usuarioPromovido = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
+        
+        if (usuarioPromovido.getRole() == RoleUser.ROLE_ADMIN) {
+            log.warn("Usuário {} tentou promover usuário admin a funcionário!", usuario.getEmail());
+            throw new BusinessException("Esse usuário já é um admin!");
+        }
+        if (usuarioPromovido.getRole() == RoleUser.ROLE_FUNCIONARIO) {
+            log.warn("Usuário {} tentou promover usuário funcionário a funcionário!", usuario.getEmail());
+            throw new BusinessException("Esse usuário já é um admin!");
+        }
+
+        usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
+
+        usuarioRepository.save(usuarioPromovido);
+        log.info("Usuário {} promovido a funcionário!", usuarioPromovido.getEmail());
+
+        return UsuarioMapper.toDTO(usuarioPromovido);
     }
 
     public Page<UsuarioResponseDTO> listarUsuarios(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
-
+        log.info("Usuário {} entrou em listar usuários", usuario.getEmail());
+    
         if(usuario.getRole() != RoleUser.ROLE_ADMIN) {
+            log.warn("usuário {} tentou visualizar todos os usuários", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para ver os usuários!");
         }
 
@@ -82,6 +124,7 @@ public class UsuarioService {
             throw new ResourceNotFound("Nenhum usuário encontrado!");
         }
 
+        log.info("Usuário {} listou usuários com sucesso!", usuario.getEmail());
         return usuarios
             .map(UsuarioMapper::toDTO);
 
@@ -90,18 +133,23 @@ public class UsuarioService {
     public UsuarioResponseDTO meusDados() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("usuário {} visualizou seus dados", usuario.getEmail());
 
         return UsuarioMapper.toDTO(usuario);
     }
 
+    @Transactional
     public void deletarUsuario(UsuarioDeletarDTO dto) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em deletar usuário", usuario.getEmail());
 
         if(!passwordEncoder.matches(dto.getSenhaAtual(), usuario.getSenha())) {
+            log.warn("Usuário {} digitou sua senha incorretamente!", usuario.getEmail());
             throw new BusinessException("Senha incorreta!");
         }
 
+        log.info("Usuário {} deletado", usuario.getEmail());
         usuarioRepository.delete(usuario);
     }
 

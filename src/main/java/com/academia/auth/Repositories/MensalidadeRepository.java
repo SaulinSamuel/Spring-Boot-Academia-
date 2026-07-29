@@ -25,4 +25,6 @@ public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> 
     boolean existsByStatus(StatusMensalidade status);
 
     List<Mensalidade> findByStatusAndDataVencimentoBefore(StatusMensalidade status, LocalDate hoje);
+
+    List<Mensalidade> findByDataCriacaoBefore(LocalDate umAnoAtras);
 }

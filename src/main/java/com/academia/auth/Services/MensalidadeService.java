@@ -176,6 +176,7 @@ public class MensalidadeService {
         return MensalidadeMapper.toDTO(mensalidade);
     }
 
+    // Método utilizado por um scheduler que atualiza a toda meia noite
     @Transactional
     public void atrasarMensalidades() {
 
@@ -190,6 +191,21 @@ public class MensalidadeService {
         }
 
         mensalidadeRepository.saveAll(mensalidadesVencidas);
+    }
+
+    // Método utilizado por um scheduler que atualiza a meia noite e apaga todas mensalidades a um ano
+    @Transactional
+    public void excluirMensalidadesAposAno() {
+
+        LocalDate hoje = LocalDate.now();
+        LocalDate umAnoAtras = hoje.minusMonths(12);
+
+        List<Mensalidade> mensalidades = mensalidadeRepository.findByDataCriacaoBefore(umAnoAtras);
+
+        for (Mensalidade m : mensalidades) {
+            log.info("Mensalidade {} deletada após um ano", m.getId());
+            mensalidadeRepository.delete(m);
+        }
     }
 
     @Transactional

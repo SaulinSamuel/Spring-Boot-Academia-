@@ -1,8 +1,8 @@
-# 🏋️ Academia API
+#  Academia API
 
 API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias, permitindo autenticação de usuários, controle de mensalidades e gerenciamento do acesso dos alunos.
 
-## 🚀 Tecnologias
+##  Tecnologias
 
 - Java 21
 - Spring Boot 4
@@ -17,9 +17,9 @@ API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias,
 
 ---
 
-# ✨ Funcionalidades
+#  Funcionalidades
 
-## 🔐 Autenticação
+##  Autenticação
 
 - Login com JWT
 - Autenticação Stateless
@@ -33,7 +33,7 @@ API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias,
 
 ---
 
-## 👤 Usuários
+##  Usuários
 
 - Cadastro de usuários
 - Atualização de dados
@@ -43,7 +43,7 @@ API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias,
 
 ---
 
-## 💳 Mensalidades
+##  Mensalidades
 
 - Criação automática de mensalidades
 - Pagamento de mensalidade
@@ -54,7 +54,7 @@ API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias,
 
 ---
 
-## 🏋️ Controle de Acesso
+##  Controle de Acesso
 
 - Registrar entrada na academia
 - Controle semanal de acessos
@@ -64,7 +64,7 @@ API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias,
 
 ---
 
-## 🔍 Busca Inteligente
+##  Busca Inteligente
 
 A API possui busca por nome utilizando pesquisa parcial.
 
@@ -84,7 +84,7 @@ Ideal para integração com pesquisas em tempo real no frontend.
 
 ---
 
-# 🔒 Segurança
+#  Segurança
 
 A autenticação é realizada através de JWT.
 
@@ -98,7 +98,7 @@ Todas as rotas protegidas utilizam Spring Security.
 
 ---
 
-# 📁 Estrutura do Projeto
+#  Estrutura do Projeto
 
 ```
 src
@@ -116,7 +116,7 @@ src
 
 ---
 
-# ⚙️ Configuração
+#  Configuração
 
 Clone o projeto
 
@@ -156,7 +156,7 @@ http://localhost:8080
 
 ---
 
-# 📚 Principais Endpoints
+#  Principais Endpoints
 
 ## Autenticação
 
@@ -197,7 +197,7 @@ http://localhost:8080
 
 ---
 
-# 📌 Regras de Negócio
+#  Regras de Negócio
 
 - Apenas usuários autenticados podem acessar recursos protegidos.
 - Funcionários possuem permissões específicas.
@@ -207,7 +207,7 @@ http://localhost:8080
 
 ---
 
-# 🛠️ Melhorias Futuras
+#  Melhorias Futuras
 
 - Dashboard administrativo
 - Relatórios
@@ -220,13 +220,13 @@ http://localhost:8080
 
 ---
 
-# 👨‍💻 Desenvolvedor
+#  Desenvolvedor
 
-Projeto desenvolvido por **João** utilizando Java e Spring Boot como prática de desenvolvimento backend e arquitetura de APIs REST.
+Projeto desenvolvido por **Saulo** utilizando Java e Spring Boot como prática de desenvolvimento backend e arquitetura de APIs REST.
 
 ---
 
-## ⭐ Objetivo
+##  Objetivo
 
 Este projeto tem como objetivo aplicar conceitos modernos de desenvolvimento backend, incluindo:
 

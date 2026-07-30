@@ -2,6 +2,8 @@ package com.academia.auth.DTOS.AcessoAcademia;
 
 import java.time.LocalDate;
 
+import com.academia.auth.Models.enums.RoleUser;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +13,9 @@ public class AcessoAcademiaResponseDTO {
     
     private String usuario;
 
-    private Integer diasAcesso;
+    private RoleUser role;
+
+    private Integer diasAcessoSemana;
 
     private LocalDate inicioSemana;
 

@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,9 @@ public class AcessoAcademia {
     private LocalDate inicioSemana;
 
     private LocalDate ultimoAcesso;
+
+    @NotBlank
+    private String nome;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

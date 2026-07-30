@@ -62,6 +62,7 @@ public class MensalidadeService {
         acessosAcademia.setUsuario(usuario);
         acessosAcademia.setInicioSemana(LocalDate.now().with(DayOfWeek.MONDAY));
         acessosAcademia.setDiasAcesso(0);
+        acessosAcademia.setNome(usuario.getNome());
 
         mensalidade.setValor(valor);
         mensalidade.setDataCriacao(LocalDate.now());

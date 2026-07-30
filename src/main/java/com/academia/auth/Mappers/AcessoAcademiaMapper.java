@@ -9,10 +9,11 @@ public class AcessoAcademiaMapper {
        
         AcessoAcademiaResponseDTO dto = new AcessoAcademiaResponseDTO();
 
-        dto.setDiasAcesso(acesso.getDiasAcesso());
+        dto.setDiasAcessoSemana(acesso.getDiasAcesso());
         dto.setInicioSemana(acesso.getInicioSemana());
+        dto.setRole(acesso.getUsuario().getRole());
         dto.setUltimoAcesso(acesso.getUltimoAcesso());
-        dto.setUsuario(acesso.getUsuario().getNome());
+        dto.setUsuario(acesso.getNome());
 
         return dto;
     }

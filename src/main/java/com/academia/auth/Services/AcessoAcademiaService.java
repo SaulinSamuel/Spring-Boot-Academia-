@@ -3,6 +3,8 @@ package com.academia.auth.Services;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class AcessoAcademiaService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final MensalidadeRepository mensalidadeRepository;
+    private final UsuarioAutenticadoService usuarioLogado;
 
     @Transactional
     public AcessoAcademiaResponseDTO acessarAcademia(AcessoAcademiaRequestDTO dto) {
@@ -41,8 +44,15 @@ public class AcessoAcademiaService {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
             .orElseThrow(() -> new ResourceNotFound("Aluno não encontrado!"));
 
+        log.info("Usuário {} entrou em acessar acaademia", usuario.getEmail());
+
         if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
+            log.warn("Usuário {} errou sua senha ao acessar academia!", usuario.getEmail());
             throw new BusinessException("Senha incorreta!");
+        }
+        if (usuario.getRole() != RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou acessar a academia como aluno!", usuario.getEmail());
+            throw new AcessoAcademiaException("Este acesso é somente para alunos!");
         }
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
@@ -55,11 +65,104 @@ public class AcessoAcademiaService {
 
         AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
 
+        LocalDate hoje = validarAcessoAcademiaAluno(acessoAcademia, mensalidade, usuario);
+
+        acessoAcademia.setUltimoAcesso(hoje);
+        acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
+
+        acessoAcademiaRepository.save(acessoAcademia);
+        log.info("Usuário {} acessou a academia as {}", usuario.getEmail(), hoje);
+
+        return AcessoAcademiaMapper.toDTO(acessoAcademia);
+    }
+
+    @Transactional
+    public AcessoAcademiaResponseDTO acessarAcademiaFuncionario(AcessoAcademiaRequestDTO dto) {
+
+        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
+            .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
+
+        if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
+            log.warn("Funcionário {} errou sua senha!", usuario.getEmail());
+            throw new BusinessException("Senha incorreta!");
+        }
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou acessar como funcionário!", usuario.getEmail());
+            throw new AcessoAcademiaException("Apenas funcionários podem utlizar esse acesso!");
+        }
+
+        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+
+        LocalDate hoje = LocalDate.now();
+
+        if (hoje.getDayOfWeek() == DayOfWeek.SATURDAY ||
+            hoje.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            log.warn("Usuário {} tentou entrar na academia fechada!", usuario.getEmail());
+            throw new AcessoAcademiaException("A academia é fechada aos sábados e domingos!");
+        }
+        if (!acessoAcademia.getInicioSemana().equals(hoje.with(DayOfWeek.MONDAY))) {
+            acessoAcademia.setDiasAcesso(0);
+            acessoAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
+        }
+
+        acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
+        acessoAcademia.setUltimoAcesso(hoje);
+
+        acessoAcademiaRepository.save(acessoAcademia);
+        log.info("Funcionário {} acessou a academia!", usuario.getEmail());
+
+        return AcessoAcademiaMapper.toDTO(acessoAcademia);
+    }
+
+    public AcessoAcademiaResponseDTO buscarSeuAcesso() {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso da academia não encontrado!"));
+
+        return AcessoAcademiaMapper.toDTO(acessoAcademia);
+    }
+
+    public Page<AcessoAcademiaResponseDTO> buscarTodosAcesso(Pageable pageable) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para visualizar esses acessos!");
+        }
+
+        Page<AcessoAcademia> acessosAcademia = acessoAcademiaRepository.findAll(pageable);
+
+        if (acessosAcademia.isEmpty()) {
+            throw new ResourceNotFound("Acessos não encontrados!");
+        }
+
+        return acessosAcademia
+            .map(AcessoAcademiaMapper::toDTO);
+    }
+
+    public Page<AcessoAcademiaResponseDTO> buscarAcessoPorNome(Pageable pageable, String nome) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para buscar acessos!");
+        }
+
+        Page<AcessoAcademia> acessosAcademia = acessoAcademiaRepository.findByNomeContainingIgnoreCase(pageable, nome);
+
+        return acessosAcademia
+            .map(AcessoAcademiaMapper::toDTO);
+    }
+
+    public LocalDate validarAcessoAcademiaAluno(AcessoAcademia acessoAcademia, Mensalidade mensalidade, Usuario usuario) {
+        
         LocalDate hoje = LocalDate.now();
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
 
         if (hoje.isEqual(hoje.with(DayOfWeek.SATURDAY)) || hoje.isEqual(hoje.with(DayOfWeek.SUNDAY))) {
-            log.warn("Usuáario {} tentou entrar na academia no sábado e domingo", usuario.getEmail());
+            log.warn("Usuário {} tentou entrar na academia no sábado e domingo", usuario.getEmail());
             throw new AcessoAcademiaException("Academia não é aberta aos sábados e domingos!");
         }
 
@@ -78,47 +181,6 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Máximo de dias de treino na semana atingidos!");
         }
 
-        acessoAcademia.setUltimoAcesso(hoje);
-        acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
-
-        acessoAcademiaRepository.save(acessoAcademia);
-        log.info("Usuário {} acessou a academia as {}", usuario.getEmail(), hoje);
-
-        return AcessoAcademiaMapper.toDTO(acessoAcademia);
-    }
-
-    @Transactional
-    public AcessoAcademiaResponseDTO acessarAcademiaFuncionario(AcessoAcademiaRequestDTO dto) {
-
-        Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
-            .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
-
-        if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
-            throw new BusinessException("Senha incorreta!");
-        }
-        if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new AcessoAcademiaException("Apenas funcionários podem utlizar esse acesso!");
-        }
-
-        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
-
-        LocalDate hoje = LocalDate.now();
-
-        if (hoje.getDayOfWeek() == DayOfWeek.SATURDAY ||
-            hoje.getDayOfWeek() == DayOfWeek.SUNDAY) {
-
-            throw new AcessoAcademiaException("A academia é fechada aos sábados e domingos!");
-        }
-        if (!acessoAcademia.getInicioSemana().equals(hoje.with(DayOfWeek.MONDAY))) {
-            acessoAcademia.setDiasAcesso(0);
-            acessoAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
-        }
-
-        acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
-        acessoAcademia.setUltimoAcesso(hoje);
-
-        acessoAcademiaRepository.save(acessoAcademia);
-
-        return AcessoAcademiaMapper.toDTO(acessoAcademia);
+        return hoje;
     }
 }

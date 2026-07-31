@@ -17,8 +17,6 @@ public class UsuarioResponseDTO {
 
     private String nome;
 
-    private Integer diasAcessoSemana;
-
     private String email;
 
     private RoleUser role;

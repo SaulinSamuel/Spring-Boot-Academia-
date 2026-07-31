@@ -56,7 +56,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidades);
     }
 
-    @PreAuthorize("hasRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @GetMapping("/buscar")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
 

@@ -12,12 +12,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class CorsConfig {
     
     @Bean
-    public CorsConfigurationSource configurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-            List.of("http://localhost:8080"));
+            List.of("http://localhost:8080", "http://localhost:8081", "http://localhost:5500",
+                "http://127.0.0.1:5500"));
         
         configuration.setAllowedMethods(
             List.of("GET", "POST", "PUT", "PATCH", "DELETE"));

@@ -276,6 +276,7 @@ public class MensalidadeService {
         mensalidadeNova.setStatus(StatusMensalidade.PENDENTE);
         mensalidadeNova.setValor(mensalidade.getValor());
         mensalidadeNova.setUsuario(usuario);
+        mensalidade.setAtualizacoes(0);
 
         mensalidadeRepository.save(mensalidadeNova);
         log.info("Nova mensalidade após pagamento de usuário {} criada", usuario.getEmail());

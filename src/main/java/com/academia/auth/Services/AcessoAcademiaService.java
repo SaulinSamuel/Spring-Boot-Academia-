@@ -44,7 +44,7 @@ public class AcessoAcademiaService {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
             .orElseThrow(() -> new ResourceNotFound("Aluno não encontrado!"));
 
-        log.info("Usuário {} entrou em acessar acaademia", usuario.getEmail());
+        log.info("Usuário {} entrou em acessar academia", usuario.getEmail());
 
         if (!passwordEncoder.matches(dto.getSenha(), usuario.getSenha())) {
             log.warn("Usuário {} errou sua senha ao acessar academia!", usuario.getEmail());

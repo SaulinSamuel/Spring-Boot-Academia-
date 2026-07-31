@@ -18,6 +18,8 @@ public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> 
 
     Page<Mensalidade> findAllByUsuario(Usuario usuario, Pageable pageable);
 
+    Page<Mensalidade> findByUsuarioNomeContainingIgnoreCase(Pageable pageable, String nome);
+
     boolean existsByUsuario(Usuario usuario);
 
     boolean existsByUsuarioAndDataCancelamentoBetween(Usuario usuario, LocalDate inicioMes, LocalDate fimMes);

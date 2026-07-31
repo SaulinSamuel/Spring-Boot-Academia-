@@ -151,6 +151,24 @@ public class MensalidadeService {
             .map(MensalidadeMapper::toDTO);
     }
 
+    public Page<MensalidadeResponseDTO> buscarMensalidadesPorNome(Pageable pageable, String nome) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para visualizar outras mensalidades!");
+        }
+
+        Page<Mensalidade> mensalidades = mensalidadeRepository.findByUsuarioNomeContainingIgnoreCase(pageable, nome);
+
+        if (mensalidades.isEmpty()) {
+            throw new ResourceNotFound("Mensalidades não encontradas!");
+        }
+
+        return mensalidades
+            .map(MensalidadeMapper::toDTO);
+    }
+
     @Transactional
     public MensalidadeResponseDTO pagarMensalidade() {
 

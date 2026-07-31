@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
@@ -61,6 +62,18 @@ public class MensalidadeController {
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
 
         Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarTodasMensalidades(pageable);
+
+        return ResponseEntity.ok(mensalidades);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @GetMapping("/pesquisar")
+    public ResponseEntity<Page<MensalidadeResponseDTO>> buscarMensalidadesPorNome(
+        @PageableDefault(size = 12, sort = "usuario.nome") Pageable pageable,
+        @RequestParam String nome
+    ) {
+
+        Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarMensalidadesPorNome(pageable, nome);
 
         return ResponseEntity.ok(mensalidades);
     }

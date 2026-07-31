@@ -1,242 +1,303 @@
-#  Academia API
+#  Academia API - Spring Boot
 
-API REST desenvolvida em **Java + Spring Boot** para gerenciamento de academias, permitindo autenticação de usuários, controle de mensalidades e gerenciamento do acesso dos alunos.
+API REST desenvolvida para gerenciamento de uma academia, com autenticação, controle de usuários, mensalidades e registro de acessos.
 
-##  Tecnologias
+O projeto foi desenvolvido utilizando **Java + Spring Boot**, aplicando boas práticas como DTOs, Services, Mappers, validações, segurança com JWT e containerização com Docker.
 
-- Java 21
-- Spring Boot 4
-- Spring Security
-- JWT (JSON Web Token)
-- Spring Data JPA
-- Hibernate
-- MySQL
-- Maven
-- Lombok
-- Bean Validation
+---
+
+##  Tecnologias utilizadas
+
+### Backend
+
+* Java 21
+* Spring Boot
+* Spring Security
+* JWT (JSON Web Token)
+* Spring Data JPA / Hibernate
+* Bean Validation
+* Lombok
+* Maven
+
+### Banco de dados
+
+* MySQL / MariaDB
+
+### Infraestrutura
+
+* Docker
+* Docker Compose
+
+### Ferramentas
+
+* IntelliJ IDEA
+* Postman
+* Git e GitHub
 
 ---
 
 #  Funcionalidades
 
-##  Autenticação
+##  Autenticação e Segurança
 
-- Login com JWT
-- Autenticação Stateless
-- Controle de permissões por Roles
+* Login utilizando JWT
+* Controle de acesso por Roles
+* Proteção de endpoints com Spring Security
+* Criptografia de senha utilizando BCrypt
 
-### Perfis
+Perfis disponíveis:
 
-- ROLE_ADMIN
-- ROLE_FUNCIONARIO
-- ROLE_USER
-
----
-
-##  Usuários
-
-- Cadastro de usuários
-- Atualização de dados
-- Exclusão
-- Buscar usuário logado
-- Controle de permissões
+```
+ROLE_ADMIN
+ROLE_USER
+ROLE_FUNCIONARIO
+```
 
 ---
 
-##  Mensalidades
+#  Usuários
 
-- Criação automática de mensalidades
-- Pagamento de mensalidade
-- Controle de vencimento
-- Histórico de mensalidades
-- Alteração da mensalidade
-- Regras de negócio para impedir pagamentos inválidos
+Funcionalidades:
 
----
-
-##  Controle de Acesso
-
-- Registrar entrada na academia
-- Controle semanal de acessos
-- Buscar acesso do usuário logado
-- Consulta de acessos
-- Pesquisa de usuários por nome
+* Cadastro de usuários
+* Atualização de dados
+* Consulta de usuários
+* Controle de permissões
+* Associação com mensalidades e acessos
 
 ---
 
-##  Busca Inteligente
+#  Mensalidades
 
-A API possui busca por nome utilizando pesquisa parcial.
+O sistema possui gerenciamento de mensalidades:
+
+* Criação de mensalidade
+* Atualização de plano
+* Pagamento de mensalidade
+* Geração automática de próxima mensalidade
+* Controle de status
+
+Status possíveis:
+
+```
+PENDENTE
+PAGA
+ATRASADA
+```
+
+Regras implementadas:
+
+* Usuário não pode possuir múltiplas mensalidades ativas
+* Apenas mensalidades pendentes ou atrasadas podem ser pagas
+* Após pagamento, uma nova mensalidade pode ser gerada automaticamente
+
+---
+
+#  Controle de acesso à academia
+
+Sistema responsável por registrar entradas dos alunos.
+
+Funcionalidades:
+
+* Validação de usuário
+* Verificação de senha
+* Conferência de mensalidade ativa
+* Controle de dias de acesso semanal
 
 Exemplo:
 
-```
-GET /academia/pesquisar?nome=jo
-```
-
-Resultado:
-
-- João
-- José
-- João Paulo
-
-Ideal para integração com pesquisas em tempo real no frontend.
+Um aluno que possui plano de 3 dias por semana terá seu acesso limitado conforme sua mensalidade.
 
 ---
 
-#  Segurança
+#  Arquitetura do projeto
 
-A autenticação é realizada através de JWT.
-
-Exemplo:
+Estrutura utilizada:
 
 ```
-Authorization: Bearer SEU_TOKEN
-```
+src/main/java/com/academia/auth
 
-Todas as rotas protegidas utilizam Spring Security.
-
----
-
-#  Estrutura do Projeto
-
-```
-src
 ├── Config
+│   ├── SecurityConfig
+│   └── CorsConfig
+│
 ├── Controllers
+│
 ├── DTOS
+│
+├── Entities
+│
 ├── Exceptions
+│
 ├── Mappers
-├── Models
+│
 ├── Repositories
-├── Security
+│
 ├── Services
-└── Utils
+│
+└── Schedulers
 ```
 
 ---
 
-#  Configuração
+#  Executando com Docker
 
-Clone o projeto
+## Pré-requisitos
 
-```bash
-git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
-```
+Instale:
 
-Entre na pasta
+* Docker
+* Docker Compose
 
-```bash
-cd auth
-```
+---
 
-Configure o arquivo `.env`
+## Configuração
 
-Exemplo:
+Crie um arquivo:
 
 ```
-DB_URL=
-DB_USERNAME=
-DB_PASSWORD=
+.env
+```
 
+baseado no exemplo:
+
+```
+.env.docker.example
+```
+
+Configure as variáveis:
+
+```
+DATABASE_URL=
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
 JWT_SECRET=
 ```
 
-Execute
+---
+
+## Subir os containers
+
+Execute:
 
 ```bash
-mvn spring-boot:run
+docker compose up -d
 ```
 
-A API ficará disponível em
-
-```
-http://localhost:8080
-```
+A aplicação será iniciada juntamente com o banco de dados.
 
 ---
 
-#  Principais Endpoints
+#  Endpoints principais
 
 ## Autenticação
 
-| Método | Endpoint |
-|---------|----------|
-| POST | /auth/login |
-| POST | /auth/register |
+```
+POST /auth/login
+POST /auth/register
+```
 
 ---
 
 ## Usuários
 
-| Método | Endpoint |
-|---------|----------|
-| GET | /usuarios/me |
-| PUT | /usuarios |
-| DELETE | /usuarios |
+```
+GET /usuarios
+GET /usuarios/{id}
+PUT /usuarios/{id}
+DELETE /usuarios/{id}
+```
 
 ---
 
 ## Mensalidades
 
-| Método | Endpoint |
-|---------|----------|
-| POST | /mensalidades |
-| PUT | /mensalidades/pagar |
-| GET | /mensalidades |
+```
+POST /mensalidades
+GET /mensalidades
+PUT /mensalidades/{id}/pagar
+```
 
 ---
 
-## Academia
+## Acesso
 
-| Método | Endpoint |
-|---------|----------|
-| POST | /academia/entrar |
-| GET | /academia/buscar |
-| GET | /academia/pesquisar?nome= |
+```
+POST /acesso
+```
 
 ---
 
-#  Regras de Negócio
+#  Documentação da API
 
-- Apenas usuários autenticados podem acessar recursos protegidos.
-- Funcionários possuem permissões específicas.
-- Administradores possuem acesso total.
-- O controle de acesso considera os dias permitidos por semana.
-- Mensalidades vencidas ou pendentes seguem regras específicas para pagamento.
+A API pode ser testada utilizando:
 
----
-
-#  Melhorias Futuras
-
-- Dashboard administrativo
-- Relatórios
-- Notificações
-- Upload de foto do usuário
-- Docker
-- RabbitMQ
-- Testes automatizados
-- Documentação Swagger/OpenAPI
+* Postman
+* Insomnia
 
 ---
 
-#  Desenvolvedor
+#  Variáveis de ambiente
 
-Projeto desenvolvido por **Saulo** utilizando Java e Spring Boot como prática de desenvolvimento backend e arquitetura de APIs REST.
+O projeto utiliza variáveis de ambiente para proteger informações sensíveis.
+
+Exemplo:
+
+```
+JWT_SECRET=
+DATABASE_PASSWORD=
+DATABASE_USERNAME=
+```
+
+Nunca envie o arquivo `.env` para o GitHub.
 
 ---
 
-##  Objetivo
+#  Docker
 
-Este projeto tem como objetivo aplicar conceitos modernos de desenvolvimento backend, incluindo:
+Arquivos relacionados:
 
-- Arquitetura em camadas
-- Spring Security
-- JWT
-- JPA/Hibernate
-- DTOs
-- Mappers
-- Tratamento de exceções
-- Validações
-- Regras de negócio
-- APIs REST
+```
+Dockerfile
+docker-compose.yml
+.dockerignore
+.env.docker.example
+```
+
+O Docker é utilizado para facilitar a execução do backend e banco de dados em diferentes ambientes.
+
+---
+
+#  Regras de negócio implementadas
+
+* Controle de permissões por cargo
+* Controle de pagamento de mensalidades
+* Restrição de acesso sem mensalidade válida
+* Controle de dias de treino
+* Criptografia de senhas
+* Tratamento de exceções personalizadas
+
+---
+
+# 👨 Autor
+
+**Saulin Samuel**
+
+Desenvolvedor em formação com foco em:
+
+* Java
+* Spring Boot
+* APIs REST
+* Banco de dados
+* Docker
+* Desenvolvimento Full Stack
+
+---
+
+#  Próximas melhorias
+
+* Implementação de testes automatizados
+* Documentação com Swagger/OpenAPI
+* Integração com gateway de pagamento
+* Melhorias no painel administrativo
+* Deploy em ambiente cloud

@@ -279,7 +279,7 @@ O Docker é utilizado para facilitar a execução do backend e banco de dados em
 
 ---
 
-# 👨 Autor
+#  Autor
 
 **Saulin Samuel**
 

@@ -121,6 +121,7 @@ public class MensalidadeService {
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAllByUsuario(usuario, pageable);
 
         if (mensalidades.isEmpty()) {
+            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
             throw new ResourceNotFound("Mensalidades não encontradas!");
         }
 
@@ -143,6 +144,7 @@ public class MensalidadeService {
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAll(pageable);
 
         if (mensalidades.isEmpty()) {
+            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
             throw new ResourceNotFound("Mensalidades não encontradas!");
         }
 
@@ -154,17 +156,21 @@ public class MensalidadeService {
     public Page<MensalidadeResponseDTO> buscarMensalidadesPorNome(Pageable pageable, String nome) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em buscar mensalidades por nome", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou pesquisar nomes sem permissão", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para visualizar outras mensalidades!");
         }
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findByUsuarioNomeContainingIgnoreCase(pageable, nome);
 
         if (mensalidades.isEmpty()) {
+            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
             throw new ResourceNotFound("Mensalidades não encontradas!");
         }
 
+        log.info("Usuário {} pesquisou mensalidades!", usuario.getEmail());
         return mensalidades
             .map(MensalidadeMapper::toDTO);
     }
@@ -238,6 +244,7 @@ public class MensalidadeService {
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
+            log.warn("Usuário {} tentou cancelar mensalidade não pendente!", usuario.getEmail());
             throw new BusinessException("Apenas mensalidades pendentes podem ser canceladas!");
         }
 

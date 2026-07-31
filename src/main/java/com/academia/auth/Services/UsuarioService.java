@@ -91,13 +91,9 @@ public class UsuarioService {
         Usuario usuarioPromovido = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
         
-        if (usuarioPromovido.getRole() == RoleUser.ROLE_ADMIN) {
-            log.warn("Usuário {} tentou promover usuário admin a funcionário!", usuario.getEmail());
-            throw new BusinessException("Esse usuário já é um admin!");
-        }
-        if (usuarioPromovido.getRole() == RoleUser.ROLE_FUNCIONARIO) {
-            log.warn("Usuário {} tentou promover usuário funcionário a funcionário!", usuario.getEmail());
-            throw new BusinessException("Esse usuário já é um admin!");
+        if (usuarioPromovido.getRole() != RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou promover usuário {} a funcionário");
+            throw new BusinessException("Você não tem permissão para promover funcionários!");
         }
 
         usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
@@ -106,6 +102,32 @@ public class UsuarioService {
         log.info("Usuário {} promovido a funcionário!", usuarioPromovido.getEmail());
 
         return UsuarioMapper.toDTO(usuarioPromovido);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO rebaixarFuncionarioAUsuario(Long id) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("usuário {} entrou em rebaixar funcionário a usuário", usuario.getEmail());;
+
+        if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
+            log.warn("");
+            throw new BusinessException("Você não tem permissão para rebaixar funcionários!");
+        }
+
+        Usuario usuarioRebaixado = usuarioRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
+
+        if (usuarioRebaixado.getRole() != RoleUser.ROLE_FUNCIONARIO) {
+            log.warn("Usuário {} tentou rebaixar usuário {} a aluno!", usuario.getEmail(), usuarioRebaixado.getEmail());
+            throw new BusinessException("Este usuário não pode ser rebaixado a um aluno!");
+        }
+
+        usuarioRebaixado.setRole(RoleUser.ROLE_USER);
+
+        usuarioRepository.save(usuarioRebaixado);
+        
+        return UsuarioMapper.toDTO(usuarioRebaixado);
     }
 
     public Page<UsuarioResponseDTO> listarUsuarios(Pageable pageable) {

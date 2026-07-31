@@ -58,6 +58,15 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{id}/rebaixar-usuario")
+    public ResponseEntity<UsuarioResponseDTO> rebaixarFuncionarioAUsuario(@PathVariable Long id) {
+
+        UsuarioResponseDTO usuario = usuarioService.rebaixarFuncionarioAUsuario(id);
+
+        return ResponseEntity.ok(usuario);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @GetMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> meusDados() {

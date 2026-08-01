@@ -250,9 +250,13 @@ public class MensalidadeService {
 
         mensalidade.setStatus(StatusMensalidade.CANCELADA);
         mensalidade.setDataCancelamento(LocalDate.now());
+        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
 
         mensalidadeRepository.save(mensalidade);
         log.info("Mensalidade {} cancelada", mensalidade.getId());
+
+        academiaRepository.delete(acessoAcademia);
+        log.info("Acesso {} deletado", acessoAcademia.getId());
 
         return MensalidadeMapper.toDTO(mensalidade);
     }

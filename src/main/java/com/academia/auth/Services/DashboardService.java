@@ -49,14 +49,16 @@ public class DashboardService {
         Long quantidadeFuncionarios = usuarioRepository.countByRole(RoleUser.ROLE_FUNCIONARIO);
         Long acessosSemana = acessoAcademiaRepository.somarDiasAcessadosSemana();
 
-        return new DashboardResponseDTO(
-            quantidadeAlunos,
-            mensalidadePendentes,
-            mensalidadesPagas,
-            faturamento,
-            quantidadeFuncionarios,
-            acessosSemana
-        );
+        DashboardResponseDTO dashboard = new DashboardResponseDTO();
+
+        dashboard.setAcessosSemana(acessosSemana);
+        dashboard.setFaturamentoTotal(faturamento);
+        dashboard.setMensalidadesPagas(mensalidadesPagas);
+        dashboard.setMensalidadesPendentes(mensalidadePendentes);
+        dashboard.setQuantidadeFuncionarios(quantidadeFuncionarios);
+        dashboard.setQuantidadeAlunos(quantidadeAlunos);
+
+        return dashboard;
     }
 
 }

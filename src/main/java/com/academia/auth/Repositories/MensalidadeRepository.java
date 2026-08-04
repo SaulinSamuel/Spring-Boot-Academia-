@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
-import com.academia.auth.Utils.StatusMensalidade;
+import com.academia.auth.Models.enums.StatusMensalidade;
 
 public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> {
     

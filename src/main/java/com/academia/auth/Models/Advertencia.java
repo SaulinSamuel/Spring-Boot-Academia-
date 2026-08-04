@@ -1,9 +1,8 @@
 package com.academia.auth.Models;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import com.academia.auth.Models.enums.StatusMensalidade;
+import com.academia.auth.Models.enums.AdvertenciaStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,50 +15,49 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+@Getter 
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 
 @Entity
-@Table(name = "mensalidade")
-public class Mensalidade {
-
+@Table(name = "advertencias")
+public class Advertencia {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer diasTreino;
+    @NotBlank
+    private String mensagem;
 
-    @Column(nullable = false)
-    private BigDecimal valor;
-
-    @Column(nullable = false)
-    private LocalDate dataCriacao;
-
-    private LocalDate dataPagamento;
-
-    private LocalDate dataCancelamento;
-
-    private Integer atualizacoes;
-
-    @Column(nullable = false)
-    private LocalDate dataVencimento;
-
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StatusMensalidade status;
+    private AdvertenciaStatus nivelAdvertencia;
+
+    @NotNull
+    @Column(name = "data_criacao")
+    private LocalDateTime dataCriacao;
+
+    @NotNull
+    @Column(name = "data_expiracao")
+    private LocalDateTime dataExpiracao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    @JoinColumn(name = "remetente_id")
+    private Usuario remetente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destinatario_id")
+    private Usuario destinatario;
 
 }

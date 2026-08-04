@@ -55,6 +55,18 @@ public class Usuario implements UserDetails{
     )
     private List<Mensalidade> mensalidades;
 
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "remetente"
+    )
+    private List<Advertencia> advertenciasEnviadas;
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "destinatario"
+    )
+    private List<Advertencia> advertenciasRecebidas;
+
     @OneToOne(
         fetch = FetchType.LAZY,
         mappedBy = "usuario"

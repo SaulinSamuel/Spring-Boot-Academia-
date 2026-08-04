@@ -3,7 +3,7 @@ package com.academia.auth.DTOS.Mensalidade;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.academia.auth.Utils.StatusMensalidade;
+import com.academia.auth.Models.enums.StatusMensalidade;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

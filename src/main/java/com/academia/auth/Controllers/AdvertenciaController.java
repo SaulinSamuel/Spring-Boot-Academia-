@@ -1,0 +1,78 @@
+package com.academia.auth.Controllers;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.academia.auth.DTOS.Advertencia.AdvertenciaRequestDTO;
+import com.academia.auth.DTOS.Advertencia.AdvertenciaResponseDTO;
+import com.academia.auth.Services.AdvertenciaService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/advertencia")
+public class AdvertenciaController {
+    
+    private final AdvertenciaService advertenciaService;
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PostMapping("/{id}/enviar")
+    public ResponseEntity<AdvertenciaResponseDTO> enviarAdvertencia(
+    @PathVariable Long id,
+    @RequestBody @Valid AdvertenciaRequestDTO dto) {
+
+        AdvertenciaResponseDTO advertencia = advertenciaService.enviarAdvertencia(dto, id);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(advertencia);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @GetMapping("/buscar")
+    public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarTodasAdvertencias(
+        @PageableDefault(size = 12, sort = "nivelAdvertencia") Pageable pageable
+    ) {
+
+        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.mostrarTodasAdvertencias(pageable);
+
+        return ResponseEntity.ok(advertencias);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @GetMapping("/pesquisar")
+    public ResponseEntity<Page<AdvertenciaResponseDTO>> buscarAdvertenciasPorNome(
+        @RequestParam String nome,
+        @PageableDefault(size = 12, sort = "nivelAdvertencia") Pageable pageable
+    ) {
+
+        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.buscarAdvertenciasPorNome(
+            nome,
+            pageable
+        );
+
+        return ResponseEntity.ok(advertencias);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @DeleteMapping("/{id}/deletar")
+    public ResponseEntity<Void> excluirAdvertencia(@PathVariable Long id) {
+
+        advertenciaService.excluirAdvertencia(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+}

@@ -1,4 +1,4 @@
-package com.academia.auth.Utils;
+package com.academia.auth.Models.enums;
 
 public enum StatusMensalidade {
     PENDENTE,

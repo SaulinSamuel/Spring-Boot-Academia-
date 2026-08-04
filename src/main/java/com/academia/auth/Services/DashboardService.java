@@ -9,10 +9,10 @@ import com.academia.auth.DTOS.Dashboard.DashboardResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
+import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
-import com.academia.auth.Utils.StatusMensalidade;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

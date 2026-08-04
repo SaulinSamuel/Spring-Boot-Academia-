@@ -18,9 +18,9 @@ import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
+import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
-import com.academia.auth.Utils.StatusMensalidade;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -325,4 +325,5 @@ public class MensalidadeService {
 
         return valor;
     }
+
 }

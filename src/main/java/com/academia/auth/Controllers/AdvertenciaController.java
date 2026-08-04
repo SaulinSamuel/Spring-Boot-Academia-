@@ -66,6 +66,28 @@ public class AdvertenciaController {
         return ResponseEntity.ok(advertencias);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER')")
+    @GetMapping("/recebidas/me")
+    public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarSuasAdvertenciasRecebidas(
+        @PageableDefault(size = 12, sort = "destinatario") Pageable pageable
+    ) {
+
+        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.mostrarSuasAdvertenciasRecebidas(pageable);
+
+        return ResponseEntity.ok(advertencias);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @GetMapping("/enviadas/me")
+    public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarSuasAdvertenciasEnviadas(
+        @PageableDefault(size = 12, sort = "remetente") Pageable pageable
+    ) {
+
+        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.mostrarSuasAdvertenciasEnviadas(pageable);
+
+        return ResponseEntity.ok(advertencias);    
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @DeleteMapping("/{id}/deletar")
     public ResponseEntity<Void> excluirAdvertencia(@PathVariable Long id) {

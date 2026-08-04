@@ -1,6 +1,7 @@
 package com.academia.auth.Repositories;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,12 @@ import jakarta.transaction.Transactional;
 public interface AdvertenciaRepository extends JpaRepository<Advertencia, Long> {
     
     Long countByDestinatario(Usuario usuario);
+
+    List<Advertencia> findAllByDestinatario(Usuario usuario);
+
+    Page<Advertencia> findAllByDestinatario(Usuario usuario, Pageable pageable);
+
+    Page<Advertencia> findAllByRemetente(Usuario usuario, Pageable pageable);
 
     Page<Advertencia> findByDestinatarioNomeContainingIgnoreCase(String nome, Pageable pageable);  
 

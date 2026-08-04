@@ -79,6 +79,30 @@ public class AdvertenciaService {
             .map(AdvertenciaMapper::toDTO);
     }
 
+    public Page<AdvertenciaResponseDTO> mostrarSuasAdvertenciasRecebidas(Pageable pageable) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        Page<Advertencia> advertencias = advertenciaRepository.findAllByDestinatario(usuario, pageable);
+
+        return advertencias
+            .map(AdvertenciaMapper::toDTO);
+    }   
+
+    public Page<AdvertenciaResponseDTO> mostrarSuasAdvertenciasEnviadas(Pageable pageable) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para visualizar essas advertências!");
+        }
+
+        Page<Advertencia> advertencias = advertenciaRepository.findAllByRemetente(usuario, pageable);
+        
+        return advertencias
+            .map(AdvertenciaMapper::toDTO);
+    }
+
     public Page<AdvertenciaResponseDTO> buscarAdvertenciasPorNome(String nome, Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -103,7 +127,9 @@ public class AdvertenciaService {
         Advertencia advertencia = advertenciaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Advertência não encontrada!"));
 
-        if (!advertencia.getRemetente().equals(usuario)) {
+        if (!advertencia.getRemetente().getId().equals(usuario.getId()) &&
+            usuario.getRole() != RoleUser.ROLE_ADMIN) 
+        {
             throw new BusinessException("Você não tem permissão para excluir essa advertência!");
         }
 
@@ -113,11 +139,17 @@ public class AdvertenciaService {
     private void definirDataExpiracao(Advertencia advertencia) {
 
         if (advertencia.getNivelAdvertencia() == AdvertenciaStatus.LEVE) {
+
             advertencia.setDataExpiracao(LocalDateTime.now().plusDays(3));
+
         } else if (advertencia.getNivelAdvertencia() == AdvertenciaStatus.MODERADA) {
+
             advertencia.setDataExpiracao(LocalDateTime.now().plusDays(6));
+
         } else if (advertencia.getNivelAdvertencia() == AdvertenciaStatus.GRAVE) {
+
             advertencia.setDataExpiracao(LocalDateTime.now().plusDays(9));
+
         }
     }
 

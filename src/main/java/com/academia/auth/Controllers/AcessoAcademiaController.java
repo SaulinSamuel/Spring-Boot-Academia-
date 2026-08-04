@@ -73,4 +73,5 @@ public class AcessoAcademiaController {
 
         return ResponseEntity.ok(acessosAcademia);
     }
+
 }

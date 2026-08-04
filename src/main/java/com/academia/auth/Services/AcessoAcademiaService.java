@@ -2,6 +2,7 @@ package com.academia.auth.Services;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +16,10 @@ import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.AcessoAcademiaMapper;
 import com.academia.auth.Models.AcessoAcademia;
+import com.academia.auth.Models.Advertencia;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
+import com.academia.auth.Models.enums.AdvertenciaStatus;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
@@ -57,11 +60,7 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Este acesso é somente para alunos!");
         }
 
-        Long advertencias = advertenciaRepository.countByDestinatario(usuario);
-
-        if (advertencias >= 3) {
-            throw new AcessoAcademiaException("Você não tem permissão para entrar na academia! (Máximo de advertências 3!)");
-        }
+        validarAdvertenciasAluno(usuario);
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
@@ -99,9 +98,9 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Apenas funcionários podem utlizar esse acesso!");
         }
 
-        Long advertencias = advertenciaRepository.countByDestinatario(usuario);
+        Long quantidadeAdvertencias = advertenciaRepository.countByDestinatario(usuario);
 
-        if (advertencias >= 3) {
+        if (quantidadeAdvertencias >= 3) {
             throw new AcessoAcademiaException("Você não tem permissão para entrar na academia! (Máximo de advertências 3!)");
         }
 
@@ -196,6 +195,29 @@ public class AcessoAcademiaService {
         }
 
         return hoje;
+    }
+
+    public void validarAdvertenciasAluno(Usuario usuario) {
+        
+        List<Advertencia> advertencias = advertenciaRepository.findAllByDestinatario(usuario);
+
+        long total = advertencias.size();
+
+        long graves = advertencias.stream()
+            .filter(a -> a.getNivelAdvertencia() == AdvertenciaStatus.GRAVE)
+            .count();
+
+        long moderadas = advertencias.stream()
+            .filter(a -> a.getNivelAdvertencia() == AdvertenciaStatus.MODERADA)
+            .count();
+        
+        if (graves >= 1) {
+            throw new AcessoAcademiaException("Você não pode acessar a academia com 1 advertência grave ou mais!");
+        } else if (moderadas >= 2) {
+            throw new AcessoAcademiaException("Você não pode acessar a academia com 2 advertências moderadas ou mais!");
+        } else if (total >= 3) {
+            throw new AcessoAcademiaException("Você não pode acessar a academia com 3 advertências ou mais!");
+        }
     }
 
 }

@@ -1,141 +1,206 @@
-#  Academia API - Spring Boot
+# 🏋️ Academia API - Spring Boot
 
-API REST desenvolvida para gerenciamento de uma academia, com autenticação, controle de usuários, mensalidades e registro de acessos.
+Uma API REST desenvolvida com **Java + Spring Boot** para gerenciamento completo de uma academia.
 
-O projeto foi desenvolvido utilizando **Java + Spring Boot**, aplicando boas práticas como DTOs, Services, Mappers, validações, segurança com JWT e containerização com Docker.
+O projeto foi criado com foco em **boas práticas de desenvolvimento Backend**, utilizando arquitetura em camadas, autenticação JWT, controle de permissões, DTOs, Mappers, Specifications, Docker e regras de negócio que simulam um sistema real de academias.
 
 ---
 
-##  Tecnologias utilizadas
+#  Tecnologias Utilizadas
 
-### Backend
+## Backend
 
 * Java 21
 * Spring Boot
 * Spring Security
+* Spring Data JPA
+* Hibernate
 * JWT (JSON Web Token)
-* Spring Data JPA / Hibernate
 * Bean Validation
 * Lombok
 * Maven
 
-### Banco de dados
+## Banco de Dados
 
 * MySQL / MariaDB
 
-### Infraestrutura
+## Infraestrutura
 
 * Docker
 * Docker Compose
 
-### Ferramentas
+## Ferramentas
 
-* IntelliJ IDEA
+* IntelliJ IDEA/VS CODE
 * Postman
-* Git e GitHub
+* Git
+* GitHub
 
 ---
 
-#  Funcionalidades
+#  Arquitetura
 
-##  Autenticação e Segurança
+O projeto segue uma arquitetura organizada em camadas.
 
-* Login utilizando JWT
+```text
+src/main/java/com/academia/auth
+
+├── Config
+├── Controllers
+├── DTOS
+├── Entities
+├── Exceptions
+├── Mappers
+├── Repositories
+├── Schedulers
+├── Security
+├── Services
+├── Specifications
+└── Utils
+```
+
+---
+
+#  Segurança
+
+A autenticação da API é realizada utilizando **JWT**.
+
+Funcionalidades implementadas:
+
+* Login com Token JWT
+* Criptografia de senhas utilizando BCrypt
 * Controle de acesso por Roles
 * Proteção de endpoints com Spring Security
-* Criptografia de senha utilizando BCrypt
+* Autorização baseada em perfis
 
 Perfis disponíveis:
 
-```
+```text
 ROLE_ADMIN
-ROLE_USER
 ROLE_FUNCIONARIO
+ROLE_USER
 ```
 
 ---
 
-#  Usuários
+# 👤 Usuários
 
-Funcionalidades:
+Funcionalidades disponíveis:
 
 * Cadastro de usuários
 * Atualização de dados
-* Consulta de usuários
+* Exclusão
+* Consulta individual
+* Consulta paginada
 * Controle de permissões
-* Associação com mensalidades e acessos
+* Associação com mensalidades
+* Associação com acessos
 
 ---
 
 #  Mensalidades
 
-O sistema possui gerenciamento de mensalidades:
+Sistema responsável pelo gerenciamento financeiro dos alunos.
 
-* Criação de mensalidade
-* Atualização de plano
-* Pagamento de mensalidade
-* Geração automática de próxima mensalidade
-* Controle de status
+Funcionalidades:
 
-Status possíveis:
+* Criar mensalidade
+* Atualizar plano
+* Realizar pagamento
+* Consultar mensalidades
+* Controle automático de status
 
-```
+Status disponíveis:
+
+```text
 PENDENTE
 PAGA
 ATRASADA
 ```
 
-Regras implementadas:
+### Regras de negócio
 
-* Usuário não pode possuir múltiplas mensalidades ativas
-* Apenas mensalidades pendentes ou atrasadas podem ser pagas
-* Após pagamento, uma nova mensalidade pode ser gerada automaticamente
+* Um usuário não pode possuir múltiplas mensalidades ativas.
+* Apenas mensalidades pendentes ou atrasadas podem ser pagas.
+* O acesso à academia depende de uma mensalidade válida.
 
 ---
 
-#  Controle de acesso à academia
+# 🚪 Controle de Acesso
 
-Sistema responsável por registrar entradas dos alunos.
+O sistema controla o acesso semanal dos alunos à academia.
 
 Funcionalidades:
 
-* Validação de usuário
-* Verificação de senha
-* Conferência de mensalidade ativa
-* Controle de dias de acesso semanal
+* Validação do usuário
+* Validação de senha
+* Verificação da mensalidade
+* Controle de dias permitidos por semana
+* Registro dos acessos
 
 Exemplo:
 
-Um aluno que possui plano de 3 dias por semana terá seu acesso limitado conforme sua mensalidade.
+Um aluno com plano de **3 dias por semana** terá sua entrada limitada a três acessos durante a semana vigente.
 
 ---
 
-#  Arquitetura do projeto
+#  Advertências
 
-Estrutura utilizada:
+O sistema possui gerenciamento completo de advertências.
 
-```
-src/main/java/com/academia/auth
+Funcionalidades:
 
-├── Config
-│   ├── SecurityConfig
-│   └── CorsConfig
-│
-├── Controllers
-│
-├── DTOS
-│
-├── Entities
-│
-├── Exceptions
-│
-├── Mappers
-│
-├── Repositories
-│
-├── Services
-│
-└── Schedulers
+* Criar advertência
+* Atualizar advertência
+* Consultar advertências
+* Excluir advertências
+* Controle de permissões para exclusão
+
+---
+
+#  Histórico de Advertências
+
+Antes que uma advertência seja excluída, ela é automaticamente registrada em um histórico.
+
+As informações armazenadas incluem:
+
+* Remetente
+* Destinatário
+* Usuário responsável pela exclusão
+* Nível da advertência
+* Mensagem
+* Data de criação
+* Data de expiração
+* Data da exclusão
+
+Esse histórico permite auditoria e rastreabilidade das advertências removidas.
+
+---
+
+#  Filtros Dinâmicos (Specifications)
+
+O projeto utiliza **Spring Data JPA Specifications**, permitindo pesquisas flexíveis sem necessidade de criar diversos métodos no Repository.
+
+É possível combinar filtros como:
+
+* Remetente
+* Destinatário
+* Usuário que realizou a exclusão
+* Nível da advertência
+* Período de exclusão
+
+Todos os filtros são opcionais e podem ser utilizados em conjunto.
+
+---
+
+#  Paginação
+
+As consultas utilizam paginação através do Spring Data.
+
+Exemplo:
+
+```text
+?page=0&size=10&sort=remetente
 ```
 
 ---
@@ -143,8 +208,6 @@ src/main/java/com/academia/auth
 #  Executando com Docker
 
 ## Pré-requisitos
-
-Instale:
 
 * Docker
 * Docker Compose
@@ -155,19 +218,19 @@ Instale:
 
 Crie um arquivo:
 
-```
+```text
 .env
 ```
 
-baseado no exemplo:
+Baseado em:
 
-```
+```text
 .env.docker.example
 ```
 
-Configure as variáveis:
+Configure:
 
-```
+```text
 DATABASE_URL=
 DATABASE_USERNAME=
 DATABASE_PASSWORD=
@@ -176,23 +239,21 @@ JWT_SECRET=
 
 ---
 
-## Subir os containers
-
-Execute:
+## Executando
 
 ```bash
 docker compose up -d
 ```
 
-A aplicação será iniciada juntamente com o banco de dados.
+A aplicação e o banco serão iniciados automaticamente.
 
 ---
 
-#  Endpoints principais
+#  Principais Endpoints
 
 ## Autenticação
 
-```
+```http
 POST /auth/login
 POST /auth/register
 ```
@@ -201,10 +262,11 @@ POST /auth/register
 
 ## Usuários
 
-```
-GET /usuarios
-GET /usuarios/{id}
-PUT /usuarios/{id}
+```http
+GET    /usuarios
+GET    /usuarios/{id}
+POST   /usuarios
+PUT    /usuarios/{id}
 DELETE /usuarios/{id}
 ```
 
@@ -212,92 +274,122 @@ DELETE /usuarios/{id}
 
 ## Mensalidades
 
-```
+```http
 POST /mensalidades
-GET /mensalidades
-PUT /mensalidades/{id}/pagar
+GET  /mensalidades
+PUT  /mensalidades/{id}/pagar
 ```
 
 ---
 
-## Acesso
+## Controle de Acesso
 
-```
+```http
 POST /acesso
 ```
 
 ---
 
-#  Documentação da API
+## Advertências
 
-A API pode ser testada utilizando:
-
-* Postman
-* Insomnia
+```http
+POST   /advertencias
+GET    /advertencias
+PUT    /advertencias/{id}
+DELETE /advertencias/{id}
+```
 
 ---
 
-#  Variáveis de ambiente
+## Histórico de Advertências
+
+```http
+GET /historico-advertencias
+```
+
+Filtros disponíveis:
+
+* remetente
+* destinatario
+* excluidoPor
+* nivelAdvertencia
+* inicio
+* fim
+
+Todos opcionais.
+
+---
+
+#  Boas Práticas Aplicadas
+
+* Arquitetura em camadas
+* DTO Pattern
+* Mapper Pattern
+* Repository Pattern
+* Specification Pattern
+* Paginação
+* Bean Validation
+* Tratamento global de exceções
+* JWT Authentication
+* Spring Security
+* Docker
+* Variáveis de ambiente
+* Separação de responsabilidades
+* Regras de negócio centralizadas nos Services
+
+---
+
+#  Variáveis de Ambiente
 
 O projeto utiliza variáveis de ambiente para proteger informações sensíveis.
 
 Exemplo:
 
-```
-JWT_SECRET=
-DATABASE_PASSWORD=
+```text
+DATABASE_URL=
 DATABASE_USERNAME=
+DATABASE_PASSWORD=
+JWT_SECRET=
 ```
 
 Nunca envie o arquivo `.env` para o GitHub.
 
 ---
 
-#  Docker
+#  Roadmap
 
-Arquivos relacionados:
+Próximas funcionalidades planejadas:
 
-```
-Dockerfile
-docker-compose.yml
-.dockerignore
-.env.docker.example
-```
-
-O Docker é utilizado para facilitar a execução do backend e banco de dados em diferentes ambientes.
-
----
-
-#  Regras de negócio implementadas
-
-* Controle de permissões por cargo
-* Controle de pagamento de mensalidades
-* Restrição de acesso sem mensalidade válida
-* Controle de dias de treino
-* Criptografia de senhas
-* Tratamento de exceções personalizadas
+* Sistema de Treinos
+* Avaliação Física
+* Dashboard Administrativo
+* Recuperação de Senha por E-mail
+* Controle de Entrada via QR Code
+* Testes Unitários e de Integração
+* RabbitMQ
+* Redis
+* CI/CD com GitHub Actions
+* Monitoramento com Spring Boot Actuator
+* Prometheus
+* Grafana
 
 ---
 
 #  Autor
 
-**Saulin Samuel**
+**Saulo Samuel**
 
-Desenvolvedor em formação com foco em:
+Desenvolvedor Backend Java com foco em:
 
 * Java
 * Spring Boot
 * APIs REST
-* Banco de dados
+* Spring Security
+* Banco de Dados
 * Docker
+* Arquitetura de Software
 * Desenvolvimento Full Stack
 
 ---
 
-#  Próximas melhorias
-
-* Implementação de testes automatizados
-* Documentação com Swagger/OpenAPI
-* Integração com gateway de pagamento
-* Melhorias no painel administrativo
-* Deploy em ambiente cloud
+ Este projeto está em constante evolução com o objetivo de aplicar conceitos utilizados em sistemas reais e aprofundar conhecimentos em desenvolvimento Backend com Java e Spring Boot.

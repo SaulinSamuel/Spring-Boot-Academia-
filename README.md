@@ -1,4 +1,4 @@
-# 🏋️ Academia API - Spring Boot
+#  Academia API - Spring Boot
 
 Uma API REST desenvolvida com **Java + Spring Boot** para gerenciamento completo de uma academia.
 

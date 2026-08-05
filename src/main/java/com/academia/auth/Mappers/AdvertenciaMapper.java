@@ -23,6 +23,7 @@ public class AdvertenciaMapper {
         dto.setId(advertencia.getId());
         dto.setMensagem(advertencia.getMensagem());
         dto.setRemetente(advertencia.getRemetente().getNome());
+        dto.setNivel(advertencia.getNivelAdvertencia());
         dto.setDestinatario(advertencia.getDestinatario().getNome());
         dto.setDataCriacao(advertencia.getDataCriacao());
         dto.setDataExpiracao(advertencia.getDataExpiracao());

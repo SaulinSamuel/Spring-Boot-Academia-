@@ -1,32 +1,31 @@
-package com.academia.auth.DTOS.Advertencia;
+package com.academia.auth.DTOS.HistoricoAdvertencia;
 
 import java.time.LocalDateTime;
 
 import com.academia.auth.Models.enums.AdvertenciaStatus;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class AdvertenciaResponseDTO {
+public class HistoricoAdvertenciaResponseDTO {
     
     private Long id;
 
     private String mensagem;
 
-    private AdvertenciaStatus nivel;
+    private AdvertenciaStatus nivelAdvertencia;
 
     private String remetente;
 
-    private String destinatario;
+    private String destinatário;
+
+    private String excluidoPor;
 
     private LocalDateTime dataCriacao;
 
     private LocalDateTime dataExpiracao;
 
+    private LocalDateTime dataExclusão;
 }

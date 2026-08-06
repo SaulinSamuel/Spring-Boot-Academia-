@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.academia.auth.DTOS.Advertencia.AdvertenciaRequestDTO;
@@ -20,6 +21,7 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AdvertenciaRepository;
 import com.academia.auth.Repositories.HistoricoAdvertenciaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.Specifications.AdvertenciaSpecification;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -69,20 +71,6 @@ public class AdvertenciaService {
         return AdvertenciaMapper.toDTO(advertencia);
     }
 
-    public Page<AdvertenciaResponseDTO> mostrarTodasAdvertencias(Pageable pageable) {
-
-        Usuario usuario = usuarioLogado.usuarioLogado();
-
-        if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new BusinessException("Você não tem permissão de visualizar advertências!");
-        }
-
-        Page<Advertencia> advertencias = advertenciaRepository.findAll(pageable);
-
-        return advertencias
-            .map(AdvertenciaMapper::toDTO);
-    }
-
     public Page<AdvertenciaResponseDTO> mostrarSuasAdvertenciasRecebidas(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -107,7 +95,15 @@ public class AdvertenciaService {
             .map(AdvertenciaMapper::toDTO);
     }
 
-    public Page<AdvertenciaResponseDTO> buscarAdvertenciasPorNome(String nome, Pageable pageable) {
+    public Page<AdvertenciaResponseDTO> buscarTodasAdvertenciasPorFiltro(
+        String remetente, 
+        String destinatario,
+        AdvertenciaStatus nivelAdvertencia,
+        LocalDateTime inicio,
+        LocalDateTime fim,
+        Pageable pageable
+    ) 
+    {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
@@ -115,13 +111,32 @@ public class AdvertenciaService {
             throw new BusinessException("Você não tem permissão de visualizar as advertências!");
         }
 
-        Page<Advertencia> advertencias = advertenciaRepository.findByDestinatarioNomeContainingIgnoreCase(
-            nome, 
-            pageable
+        Specification<Advertencia> spec = Specification.where(
+            AdvertenciaSpecification.dataCriacao(inicio, fim)
         );
+        spec.and(AdvertenciaSpecification.destinatario(destinatario));
+        spec.and(AdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
+        spec.and(AdvertenciaSpecification.remetente(remetente));
+
+        Page<Advertencia> advertencias = advertenciaRepository.findAll(spec, pageable);
 
         return advertencias
             .map(AdvertenciaMapper::toDTO);
+    }
+
+    public AdvertenciaResponseDTO buscarAdvertenciaPorId(Long id) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão de visualizar essa advertência!");
+        }
+
+        Advertencia advertencia = advertenciaRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFound("Advertência não encontrada!"));
+
+        return AdvertenciaMapper.toDTO(advertencia);
+
     }
 
     @Transactional

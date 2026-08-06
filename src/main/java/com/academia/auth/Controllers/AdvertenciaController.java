@@ -1,8 +1,11 @@
 package com.academia.auth.Controllers;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.academia.auth.DTOS.Advertencia.AdvertenciaRequestDTO;
 import com.academia.auth.DTOS.Advertencia.AdvertenciaResponseDTO;
+import com.academia.auth.Models.enums.AdvertenciaStatus;
 import com.academia.auth.Services.AdvertenciaService;
 
 import jakarta.validation.Valid;
@@ -41,29 +45,37 @@ public class AdvertenciaController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
-    @GetMapping("/buscar")
-    public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarTodasAdvertencias(
+    @GetMapping("/pesquisar")
+    public ResponseEntity<Page<AdvertenciaResponseDTO>> buscarAdvertenciasPorFiltro(
+        @RequestParam(required = false) String remetente,
+        @RequestParam(required = false) String destinatario,
+        @RequestParam(required = false) AdvertenciaStatus nivelAdvertencia,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        @RequestParam(required = false) LocalDateTime inicio,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        @RequestParam(required = false) LocalDateTime fim,
         @PageableDefault(size = 12, sort = "nivelAdvertencia") Pageable pageable
     ) {
 
-        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.mostrarTodasAdvertencias(pageable);
+        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.buscarTodasAdvertenciasPorFiltro(
+            remetente, 
+            destinatario, 
+            nivelAdvertencia, 
+            inicio, 
+            fim, 
+            pageable
+        );
 
         return ResponseEntity.ok(advertencias);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
-    @GetMapping("/pesquisar")
-    public ResponseEntity<Page<AdvertenciaResponseDTO>> buscarAdvertenciasPorNome(
-        @RequestParam String nome,
-        @PageableDefault(size = 12, sort = "nivelAdvertencia") Pageable pageable
-    ) {
+    @GetMapping("/{id}/buscar")
+    public ResponseEntity<AdvertenciaResponseDTO> buscarAdvertenciaPorId(@PathVariable Long id) {
 
-        Page<AdvertenciaResponseDTO> advertencias = advertenciaService.buscarAdvertenciasPorNome(
-            nome,
-            pageable
-        );
+        AdvertenciaResponseDTO advertencia = advertenciaService.buscarAdvertenciaPorId(id);
 
-        return ResponseEntity.ok(advertencias);
+        return ResponseEntity.ok(advertencia);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER')")

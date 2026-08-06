@@ -83,7 +83,7 @@ ROLE_USER
 
 ---
 
-# 👤 Usuários
+#  Usuários
 
 Funcionalidades disponíveis:
 
@@ -126,7 +126,7 @@ ATRASADA
 
 ---
 
-# 🚪 Controle de Acesso
+#  Controle de Acesso
 
 O sistema controla o acesso semanal dos alunos à academia.
 

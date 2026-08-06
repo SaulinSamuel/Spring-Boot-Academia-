@@ -45,7 +45,7 @@ public class HistoricoAdvertenciaController {
         Page<HistoricoAdvertenciaResponseDTO> historicoAdvertencias = historicoAdvertenciaService.buscarHistoricoAdvertenciasPorFiltro(
             remetente, 
             destinatario, 
-            excluidoPor, 
+            excluidoPor,
             nivelAdvertencia, 
             inicio, 
             fim, 

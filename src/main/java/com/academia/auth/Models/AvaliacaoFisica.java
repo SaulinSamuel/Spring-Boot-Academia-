@@ -1,14 +1,9 @@
 package com.academia.auth.Models;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import com.academia.auth.Models.enums.StatusMensalidade;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,37 +24,46 @@ import lombok.Setter;
 @Builder
 
 @Entity
-@Table(name = "mensalidade")
-public class Mensalidade {
-
+@Table(name = "avaliacoes_fisicas")
+public class AvaliacaoFisica {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Integer diasTreino;
+    private Double peso;
 
     @Column(nullable = false)
-    private BigDecimal valor;
+    private Double altura;
 
     @Column(nullable = false)
-    private LocalDate dataCriacao;
+    private Integer idade;
 
-    private LocalDate dataPagamento;
+    @Column(name = "percentual_gordura", nullable = false)
+    private Double percentualGordura;
 
-    private LocalDate dataCancelamento;
-
-    private Integer atualizacoes;
-
-    @Column(nullable = false)
-    private LocalDate dataVencimento;
+    @Column(name = "massa_muscular", nullable = false)
+    private Double massaMuscular;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusMensalidade status;
+    private Double braco;
+
+    @Column(nullable = false)
+    private Double peito;
+
+    @Column(nullable = false)
+    private Double cintura;
+
+    @Column(name = "data_avaliacao", nullable = false)
+    private LocalDate dataAvaliacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "aluno_id", nullable = false)
+    private Usuario aluno;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avaliador_id", nullable = false)
+    private Usuario avaliador;
 
 }

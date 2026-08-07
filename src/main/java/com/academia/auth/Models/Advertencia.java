@@ -15,8 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,27 +35,25 @@ public class Advertencia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @Column(nullable = false)
     private String mensagem;
 
-    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AdvertenciaStatus nivelAdvertencia;
 
-    @NotNull
-    @Column(name = "data_criacao")
+    @Column(name = "data_criacao", nullable = false)
     private LocalDateTime dataCriacao;
 
-    @NotNull
-    @Column(name = "data_expiracao")
+    @Column(name = "data_expiracao", nullable = false)
     private LocalDateTime dataExpiracao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "remetente_id")
+    @JoinColumn(name = "remetente_id", nullable = false)
     private Usuario remetente;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destinatario_id")
+    @JoinColumn(name = "destinatario_id", nullable = false)
     private Usuario destinatario;
 
 }

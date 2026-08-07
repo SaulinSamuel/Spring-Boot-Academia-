@@ -187,8 +187,9 @@ public class AcessoAcademiaService {
         
         LocalDate hoje = LocalDate.now();
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
+        DayOfWeek dia = hoje.getDayOfWeek();
 
-        if (hoje.isEqual(hoje.with(DayOfWeek.SATURDAY)) || hoje.isEqual(hoje.with(DayOfWeek.SUNDAY))) {
+        if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
             log.warn("Usuário {} tentou entrar na academia no sábado e domingo", usuario.getEmail());
             throw new AcessoAcademiaException("Academia não é aberta aos sábados e domingos!");
         }
@@ -206,6 +207,10 @@ public class AcessoAcademiaService {
         if (acessoAcademia.getDiasAcesso() >= mensalidade.getDiasTreino()) {
             log.warn("Usuário {} tentou acessar mais de {} vezes na semana", usuario.getEmail(), mensalidade.getDiasTreino());
             throw new AcessoAcademiaException("Máximo de dias de treino na semana atingidos!");
+        }
+
+        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoAcademiaException("Esse acesso não pertence a você!");
         }
 
         return hoje;

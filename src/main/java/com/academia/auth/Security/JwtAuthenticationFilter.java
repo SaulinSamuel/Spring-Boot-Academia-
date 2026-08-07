@@ -10,14 +10,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
-
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -63,9 +66,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext()
                     .setAuthentication(authenticationToken);
                 }
-                
-            } catch (Exception e) {
-            System.out.println("Erro: " + e.getMessage());
+            
+            } catch(ExpiredJwtException e) {
+
+                log.warn("JWT expirado!");
+
+            } catch (JwtException | IllegalArgumentException e) {
+
+            log.warn("JWT inválido: {}", e.getMessage());
         }
         
         filterChain.doFilter(request, response);

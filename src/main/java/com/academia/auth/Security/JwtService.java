@@ -40,16 +40,12 @@ public class JwtService {
 
     public String extrairUsername(String token) {
 
-        try {
             return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
     }
 
 }   

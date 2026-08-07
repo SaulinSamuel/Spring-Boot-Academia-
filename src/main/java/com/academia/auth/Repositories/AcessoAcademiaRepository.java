@@ -16,7 +16,7 @@ public interface AcessoAcademiaRepository extends JpaRepository<AcessoAcademia, 
 
     @Query("""
             SELECT COALESCE(SUM(a.diasAcesso), 0)
-            FROM AcessoAcademia a
+            FROM AcessoAcademia a   
             """)
     Long somarDiasAcessadosSemana();
 

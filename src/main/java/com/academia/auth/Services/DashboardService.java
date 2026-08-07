@@ -2,6 +2,7 @@ package com.academia.auth.Services;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -40,13 +41,16 @@ public class DashboardService {
         LocalDate fim = inicio.withDayOfMonth(inicio.lengthOfMonth());
 
         Long quantidadeAlunos = usuarioRepository.countByRole(RoleUser.ROLE_USER);
-        Long mensalidadePendentes = mensalidadeRepository.countByStatus(StatusMensalidade.PENDENTE);
+        Long mensalidadesPendentes = mensalidadeRepository.countByStatus(StatusMensalidade.PENDENTE);
         Long mensalidadesPagas = mensalidadeRepository.countByStatus(StatusMensalidade.PAGA);
-        BigDecimal faturamento = mensalidadeRepository.somarValorPorPeriodo(
-            StatusMensalidade.PAGA,
-            inicio,
-            fim
-        );
+
+        BigDecimal faturamento = Optional.ofNullable(
+            mensalidadeRepository.somarValorPorPeriodo(StatusMensalidade.PAGA, 
+                inicio, 
+                fim
+            )
+        ).orElse(BigDecimal.ZERO);
+        
         Long quantidadeFuncionarios = usuarioRepository.countByRole(RoleUser.ROLE_FUNCIONARIO);
         Long acessosSemana = acessoAcademiaRepository.somarDiasAcessadosSemana();
 
@@ -55,7 +59,7 @@ public class DashboardService {
         dashboard.setAcessosSemana(acessosSemana);
         dashboard.setFaturamentoTotal(faturamento);
         dashboard.setMensalidadesPagas(mensalidadesPagas);
-        dashboard.setMensalidadesPendentes(mensalidadePendentes);
+        dashboard.setMensalidadesPendentes(mensalidadesPendentes);
         dashboard.setQuantidadeFuncionarios(quantidadeFuncionarios);
         dashboard.setQuantidadeAlunos(quantidadeAlunos);
 

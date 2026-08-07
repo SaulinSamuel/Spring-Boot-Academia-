@@ -50,7 +50,7 @@ public class AvaliacaoFisicaService {
         LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
         if (avaliacaoFisicaRepository.existsByAlunoAndDataAvaliacaoBetween(
-            usuario, inicioMes, fimMes)
+            aluno, inicioMes, fimMes)
         )
         {
             throw new BusinessException("Avaliação física só pode ser feita uma vez no mês por aluno!");
@@ -142,7 +142,7 @@ public class AvaliacaoFisicaService {
             .orElseThrow(() -> new ResourceNotFound("Avaliação física não encontrada!"));
 
         boolean isAdmin = usuario.getRole() == RoleUser.ROLE_ADMIN;
-        boolean isAvaliador = avaliacaoFisica.getAvaliador().equals(usuario.getId());
+        boolean isAvaliador = avaliacaoFisica.getAvaliador().getId().equals(usuario.getId());
     
         if (!isAdmin && !isAvaliador) {
             throw new BusinessException("Você não tem permissão para excluir essa avaliação física!");

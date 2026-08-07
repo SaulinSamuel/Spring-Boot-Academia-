@@ -21,6 +21,7 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AdvertenciaRepository;
 import com.academia.auth.Repositories.HistoricoAdvertenciaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 import com.academia.auth.Specifications.AdvertenciaSpecification;
 
 import jakarta.transaction.Transactional;
@@ -111,12 +112,12 @@ public class AdvertenciaService {
             throw new BusinessException("Você não tem permissão de visualizar as advertências!");
         }
 
-        Specification<Advertencia> spec = Specification.where(
-            AdvertenciaSpecification.dataCriacao(inicio, fim)
-        );
-        spec.and(AdvertenciaSpecification.destinatario(destinatario));
-        spec.and(AdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
-        spec.and(AdvertenciaSpecification.remetente(remetente));
+        Specification<Advertencia> spec = (root, query, cb) -> null;
+
+        spec = spec.and(AdvertenciaSpecification.dataCriacao(inicio, fim));
+        spec = spec.and(AdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
+        spec = spec.and(AdvertenciaSpecification.remetente(remetente));
+        spec = spec.and(AdvertenciaSpecification.destinatario(destinatario));
 
         Page<Advertencia> advertencias = advertenciaRepository.findAll(spec, pageable);
 

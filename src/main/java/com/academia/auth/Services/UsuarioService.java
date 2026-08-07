@@ -15,6 +15,7 @@ import com.academia.auth.Mappers.UsuarioMapper;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

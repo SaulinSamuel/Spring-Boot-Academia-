@@ -15,8 +15,10 @@ import com.academia.auth.Exceptions.AcessoAcademiaException;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.AcessoAcademiaMapper;
+import com.academia.auth.Mappers.HistoricoAcessosMapper;
 import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Advertencia;
+import com.academia.auth.Models.HistoricoAcessos;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.AdvertenciaStatus;
@@ -24,8 +26,10 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.AdvertenciaRepository;
+import com.academia.auth.Repositories.HistoricoAcessosRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,7 @@ public class AcessoAcademiaService {
     private final PasswordEncoder passwordEncoder;
     private final MensalidadeRepository mensalidadeRepository;
     private final UsuarioAutenticadoService usuarioLogado;
+    private final HistoricoAcessosRepository historicoAcessosRepository;
 
     @Transactional
     public AcessoAcademiaResponseDTO acessarAcademia(AcessoAcademiaRequestDTO dto) {
@@ -77,6 +82,10 @@ public class AcessoAcademiaService {
         acessoAcademia.setUltimoAcesso(hoje);
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
 
+        HistoricoAcessos historicoAcessos = HistoricoAcessosMapper.toHistoricoAcessosFromAcesso(acessoAcademia);
+
+        historicoAcessosRepository.save(historicoAcessos);
+
         acessoAcademiaRepository.save(acessoAcademia);
         log.info("Usuário {} acessou a academia as {}", usuario.getEmail(), hoje);
 
@@ -104,7 +113,8 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Você não tem permissão para entrar na academia! (Máximo de advertências 3!)");
         }
 
-        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+        AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso não encontrado!"));
 
         LocalDate hoje = LocalDate.now();
 
@@ -120,6 +130,10 @@ public class AcessoAcademiaService {
 
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
         acessoAcademia.setUltimoAcesso(hoje);
+
+        HistoricoAcessos historicoAcessos = HistoricoAcessosMapper.toHistoricoAcessosFromAcesso(acessoAcademia);
+
+        historicoAcessosRepository.save(historicoAcessos);
 
         acessoAcademiaRepository.save(acessoAcademia);
         log.info("Funcionário {} acessou a academia!", usuario.getEmail());

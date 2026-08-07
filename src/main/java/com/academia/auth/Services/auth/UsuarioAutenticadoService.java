@@ -1,4 +1,4 @@
-package com.academia.auth.Services;
+package com.academia.auth.Services.auth;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

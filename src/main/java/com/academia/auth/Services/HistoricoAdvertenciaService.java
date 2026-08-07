@@ -16,6 +16,7 @@ import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.AdvertenciaStatus;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.HistoricoAdvertenciaRepository;
+import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 import com.academia.auth.Specifications.HistoricoAdvertenciaSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -59,17 +60,13 @@ public class HistoricoAdvertenciaService {
             throw new BusinessException("Você não tem permissão de visualizar esse histórico!");
         }
 
-        Specification<HistoricoAdvertencia> spec = Specification.where(
-            HistoricoAdvertenciaSpecification.destinatario(destinatario))
-        .and(
-            HistoricoAdvertenciaSpecification.remetente(remetente))
-        .and(
-            HistoricoAdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia))
-        .and(
-            HistoricoAdvertenciaSpecification.dataExclusão(inicio, fim)
-        )
-        .and(HistoricoAdvertenciaSpecification.excluidoPor(excluidoPor)
-        );
+        Specification<HistoricoAdvertencia> spec = (root, query, cb) -> null;
+        
+        spec.and(HistoricoAdvertenciaSpecification.dataExclusão(inicio, fim));
+        spec.and(HistoricoAdvertenciaSpecification.destinatario(destinatario));
+        spec.and(HistoricoAdvertenciaSpecification.excluidoPor(excluidoPor));
+        spec.and(HistoricoAdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
+        spec.and(HistoricoAdvertenciaSpecification.remetente(remetente));
 
         Page<HistoricoAdvertencia> historicoAdvertencias = historicoAdvertenciaRepository.findAll(
             spec, pageable

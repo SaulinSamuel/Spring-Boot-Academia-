@@ -19,7 +19,7 @@ public class AdvertenciaResponseDTO {
 
     private String mensagem;
 
-    private AdvertenciaStatus nivel;
+    private AdvertenciaStatus nivelAdvertencia;
 
     private String remetente;
 

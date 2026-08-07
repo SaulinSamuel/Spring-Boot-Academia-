@@ -21,6 +21,7 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
+import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

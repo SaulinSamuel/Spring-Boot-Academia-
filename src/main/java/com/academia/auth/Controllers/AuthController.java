@@ -11,8 +11,8 @@ import com.academia.auth.DTOS.Login.LoginRequestDTO;
 import com.academia.auth.DTOS.Login.LoginResponseDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
-import com.academia.auth.Services.AuthService;
 import com.academia.auth.Services.UsuarioService;
+import com.academia.auth.Services.auth.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

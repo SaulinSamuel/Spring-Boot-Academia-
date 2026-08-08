@@ -39,11 +39,15 @@ public class AvaliacaoFisicaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new BusinessException("Você não tem permissão para criar avaliações fisícas!");
+            throw new BusinessException("Você não tem permissão para criar avaliações físicas!");
         }
 
         Usuario aluno = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Aluno não encontrado!"));
+
+        if (aluno.getRole() != RoleUser.ROLE_USER) {
+            throw new BusinessException("Não é permitido fazer avaliações físicas em funcionários!");
+        }
 
         LocalDate hoje = LocalDate.now();
         LocalDate inicioMes = hoje.withDayOfMonth(1);
@@ -67,9 +71,13 @@ public class AvaliacaoFisicaService {
         return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);
     }
 
-    public Page<AvaliacaoResponseDTO> buscarSuasAvaliacaoFisica(Pageable pageable) {
+    public Page<AvaliacaoResponseDTO> buscarSuasAvaliacaoFisicaAlunos(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() != RoleUser.ROLE_USER) {
+            throw new BusinessException("Apenas alunos podem visualizar suas avaliações físicas por aqui!");
+        }
 
         Page<AvaliacaoFisica> avaliacoesFisicas = avaliacaoFisicaRepository.findAllByAluno(usuario, pageable);
 
@@ -80,6 +88,10 @@ public class AvaliacaoFisicaService {
     public Page<AvaliacaoResponseDTO> buscarSuasAvaliacoesFisicasCriadas(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Apenas funcionários e admins podem ver suas avaliações físicas criadas!");
+        }
 
         Page<AvaliacaoFisica> avaliacoesFisicas = avaliacaoFisicaRepository.findAllByAvaliador(
             usuario, 
@@ -124,11 +136,11 @@ public class AvaliacaoFisicaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new BusinessException("Você não tem permissão de visualizar essa avaliação fisiíca!");
+            throw new BusinessException("Você não tem permissão de visualizar essa avaliação física!");
         }
 
         AvaliacaoFisica avaliacaoFisica = avaliacaoFisicaRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFound("Avaliação física não  encontrado!"));
+            .orElseThrow(() -> new ResourceNotFound("Avaliação física não encontrada!"));
             
         return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);       
     }

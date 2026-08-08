@@ -52,7 +52,7 @@ public class AvaliacaoFisicaController {
     {
 
         Page<AvaliacaoResponseDTO> avaliacoesFisicas = avaliacaoFisicaService
-            .buscarSuasAvaliacaoFisica(pageable);
+            .buscarSuasAvaliacaoFisicaAlunos(pageable);
         
         return ResponseEntity.ok(avaliacoesFisicas);
     }

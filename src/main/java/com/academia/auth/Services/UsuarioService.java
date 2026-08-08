@@ -60,7 +60,7 @@ public class UsuarioService {
         }
 
         if(usuarioRepository.existsByEmailAndIdNot(dto.getEmail(), usuario.getId())) {
-            log.warn("Usuário {} tentou cadastrar com email já existente!", usuario.getEmail());
+            log.warn("Usuário {} tentou modificar seu email mas já existente!", usuario.getEmail());
             throw new BusinessException("Usuário já existente com esse email!");
         }
 

@@ -85,7 +85,7 @@ public class UsuarioService {
         log.info("Usuário {} entrou em promover usuário a funcionário", usuario.getEmail());
 
         if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
-            log.warn("Usuário {} tentou promover usuário {} a funcionário", usuario.getId(), id);
+            log.warn("Usuário {} tentou promover usuário id: {} a funcionário", usuario.getEmail(), id);
             throw new BusinessException("Você não tem permissão para promover usuário a funcionário!");
         }
 
@@ -112,7 +112,7 @@ public class UsuarioService {
         log.info("usuário {} entrou em rebaixar funcionário a usuário", usuario.getEmail());;
 
         if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
-            log.warn("");
+            log.warn("Usuário {} tentou rebaixar funcionário id: {} a usuário!", usuario.getId(), id);
             throw new BusinessException("Você não tem permissão para rebaixar funcionários!");
         }
 
@@ -136,7 +136,7 @@ public class UsuarioService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em listar usuários", usuario.getEmail());
     
-        if(usuario.getRole() != RoleUser.ROLE_ADMIN) {
+        if(usuario.getRole() == RoleUser.ROLE_USER) {
             log.warn("usuário {} tentou visualizar todos os usuários", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para ver os usuários!");
         }
@@ -150,7 +150,6 @@ public class UsuarioService {
         log.info("Usuário {} listou usuários com sucesso!", usuario.getEmail());
         return usuarios
             .map(UsuarioMapper::toDTO);
-
     }
 
     public UsuarioResponseDTO meusDados() {

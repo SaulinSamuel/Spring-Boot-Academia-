@@ -188,7 +188,7 @@ public class MensalidadeService {
         
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE && 
             mensalidade.getStatus() != StatusMensalidade.ATRASADA) {
-            log.warn("Usuário {} tentou pagar mensalidade {} já paga ou atrasada", usuario.getEmail(), mensalidade.getId());
+            log.warn("Usuário {} tentou pagar mensalidade {} já paga ou cancelada!", usuario.getEmail(), mensalidade.getId());
             throw new BusinessException("Apenas mensalidades pendentes(ou atrasadas) podem ser pagas!");
         }
 
@@ -252,7 +252,8 @@ public class MensalidadeService {
 
         mensalidade.setStatus(StatusMensalidade.CANCELADA);
         mensalidade.setDataCancelamento(LocalDate.now());
-        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+        AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
 
         mensalidadeRepository.save(mensalidade);
         log.info("Mensalidade {} cancelada", mensalidade.getId());

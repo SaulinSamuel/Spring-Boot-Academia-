@@ -34,6 +34,7 @@ public class AvaliacaoFisicaMapper {
         dto.setIdade(avaliacaoFisica.getIdade());
         dto.setMassaMuscular(avaliacaoFisica.getMassaMuscular());
         dto.setNome(avaliacaoFisica.getAluno().getNome());
+        dto.setAvaliador(avaliacaoFisica.getAvaliador().getNome());
         dto.setPeito(avaliacaoFisica.getPeito());
         dto.setPercentualGordura(avaliacaoFisica.getPercentualGordura());
 

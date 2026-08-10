@@ -21,6 +21,8 @@ public class AvaliacaoResponseDTO {
 
     private String nome;
 
+    private String avaliador;
+
     private Double percentualGordura;
 
     private Double massaMuscular;

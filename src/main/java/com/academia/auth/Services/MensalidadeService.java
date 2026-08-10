@@ -41,14 +41,15 @@ public class MensalidadeService {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
-        log.info("Criando mensalidade para usuário{}", usuario.getEmail());
+        log.info("Criando mensalidade para usuário {}", usuario.getEmail());
 
         if(mensalidadeRepository.existsByUsuarioAndStatus(usuario, StatusMensalidade.PENDENTE)) {
+            log.warn("Usuário {} tentou criar mensalidade mas já possui pendentes!", usuario.getEmail());
             throw new BusinessException("Você já possui mensalidades pendentes!");
         }
 
         LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
-        LocalDate fimMes = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+        LocalDate fimMes = LocalDate.now().withDayOfMonth(inicioMes.lengthOfMonth());
 
         if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween (usuario, inicioMes, fimMes)) {
             log.warn("Usuário {} tentou cancelar mais de uma mensalidade no mês.", usuario.getEmail());
@@ -88,7 +89,7 @@ public class MensalidadeService {
     public MensalidadeResponseDTO atualizarMensalidade(MensalidadeRequestDTO dto) {
         
         Usuario usuario = usuarioLogado.usuarioLogado();
-        log.info("Usuário {} entrou em atualizar quantidade", usuario.getEmail());
+        log.info("Usuário {} entrou em atualizar mensalidade", usuario.getEmail());
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));

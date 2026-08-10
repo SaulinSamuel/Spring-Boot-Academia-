@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Service
 public class AvaliacaoFisicaService {
-    
+
     private final AvaliacaoFisicaRepository avaliacaoFisicaRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioAutenticadoService usuarioLogado;
@@ -68,6 +68,38 @@ public class AvaliacaoFisicaService {
 
         avaliacaoFisicaRepository.save(avaliacaoFisica);
         
+        return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);
+    }
+
+    @Transactional
+    public AvaliacaoResponseDTO editarAvaliacaoFisica(AvaliacaoRequestDTO dto, Long id) {
+        
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para editar avaliações fisícas!");
+        }
+
+        AvaliacaoFisica avaliacaoFisica  = avaliacaoFisicaRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFound("Avaliação fisíca não encontrada!"));
+
+        if (!(usuario.getRole() == RoleUser.ROLE_ADMIN) && 
+            !avaliacaoFisica.getAvaliador().getId().equals(usuario.getId())) 
+        {
+            throw new BusinessException("Você não tem permissão para editar essa avaliação física!");
+        }
+
+        avaliacaoFisica.setAltura(dto.getAltura());
+        avaliacaoFisica.setBraco(dto.getBraco());
+        avaliacaoFisica.setCintura(dto.getCintura());
+        avaliacaoFisica.setIdade(dto.getIdade());
+        avaliacaoFisica.setMassaMuscular(dto.getMassaMuscular());
+        avaliacaoFisica.setPeito(dto.getPeito());
+        avaliacaoFisica.setPercentualGordura(dto.getPercentualGordura());
+        avaliacaoFisica.setPeso(dto.getPeso());
+
+        avaliacaoFisicaRepository.save(avaliacaoFisica);
+
         return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);
     }
 

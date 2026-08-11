@@ -88,6 +88,20 @@ public class MensalidadeServiceTest {
         return m;
     }
 
+    private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
+
+        LocalDate hoje = LocalDate.now();
+
+        AcessoAcademia acessoAcademia = new AcessoAcademia();
+        acessoAcademia.setDiasAcesso(0);
+        acessoAcademia.setId(2L);
+        acessoAcademia.setInicioSemana(hoje);
+        acessoAcademia.setNome(usuario.getNome());
+        acessoAcademia.setUltimoAcesso(hoje);
+
+        return acessoAcademia;
+    }
+
     @Nested
     class criarMensalidadeTest {
 
@@ -280,31 +294,11 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
             .thenReturn(usuario);
 
-            LocalDate hoje = LocalDate.now();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
 
-            Mensalidade mensalidade = new Mensalidade();
-
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
-            mensalidade.setDataVencimento(hoje.plusMonths(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
-
-            Mensalidade mensalidade2 = new Mensalidade();
-
-            mensalidade2.setValor(BigDecimal.valueOf(50));
-            mensalidade2.setDataCriacao(hoje);
-            mensalidade2.setDataVencimento(hoje.plusMonths(1));
-            mensalidade2.setUsuario(usuario);
-            mensalidade2.setDiasTreino(3);
-            mensalidade2.setDataPagamento(null);
-            mensalidade2.setDataCancelamento(null);
-            mensalidade2.setAtualizacoes(0);
-            mensalidade2.setStatus(StatusMensalidade.PENDENTE);
+            Mensalidade mensalidade2 = criarMensalidadePendente(usuario);
+            mensalidade.setId(2L);
 
             Pageable pageable = PageRequest.of(0, 10);
             List<Mensalidade> mensalidades = List.of(mensalidade, mensalidade2);
@@ -361,31 +355,11 @@ public class MensalidadeServiceTest {
 
             usuario.setRole(RoleUser.ROLE_ADMIN);
 
-            LocalDate hoje = LocalDate.now();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
 
-            Mensalidade mensalidade = new Mensalidade();
-
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
-            mensalidade.setDataVencimento(hoje.plusMonths(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
-
-            Mensalidade mensalidade2 = new Mensalidade();
-
-            mensalidade2.setValor(BigDecimal.valueOf(50));
-            mensalidade2.setDataCriacao(hoje);
-            mensalidade2.setDataVencimento(hoje.plusMonths(1));
-            mensalidade2.setUsuario(usuario);
-            mensalidade2.setDiasTreino(3);
-            mensalidade2.setDataPagamento(null);
-            mensalidade2.setDataCancelamento(null);
-            mensalidade2.setAtualizacoes(0);
-            mensalidade2.setStatus(StatusMensalidade.PENDENTE);
+            Mensalidade mensalidade2 = criarMensalidadePendente(usuario);
+            mensalidade2.setId(2L);
 
             List<Mensalidade> mensalidades = List.of(mensalidade, mensalidade2);
 
@@ -435,31 +409,11 @@ public class MensalidadeServiceTest {
 
             usuario.setRole(RoleUser.ROLE_ADMIN);
 
-            LocalDate hoje = LocalDate.now();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
 
-            Mensalidade mensalidade = new Mensalidade();
-
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
-            mensalidade.setDataVencimento(hoje.plusMonths(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
-
-            Mensalidade mensalidade2 = new Mensalidade();
-
-            mensalidade2.setValor(BigDecimal.valueOf(50));
-            mensalidade2.setDataCriacao(hoje);
-            mensalidade2.setDataVencimento(hoje.plusMonths(1));
-            mensalidade2.setUsuario(usuario);
-            mensalidade2.setDiasTreino(3);
-            mensalidade2.setDataPagamento(null);
-            mensalidade2.setDataCancelamento(null);
-            mensalidade2.setAtualizacoes(0);
-            mensalidade2.setStatus(StatusMensalidade.PENDENTE);
+            Mensalidade mensalidade2 = criarMensalidadePendente(usuario);
+            mensalidade2.setId(2L);
 
             List<Mensalidade> mensalidades = List.of(mensalidade, mensalidade2);
 
@@ -505,20 +459,8 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
-            Mensalidade mensalidade = new Mensalidade();
-
-            LocalDate hoje = LocalDate.now();
-
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
             mensalidade.setId(1L);
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
-            mensalidade.setDataVencimento(hoje.plusMonths(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
             when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
@@ -548,19 +490,8 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
-            Mensalidade mensalidade = new Mensalidade();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
-            LocalDate hoje = LocalDate.now();
-
-            mensalidade.setId(1L);
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
-            mensalidade.setDataVencimento(hoje.plusMonths(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
             mensalidade.setStatus(StatusMensalidade.CANCELADA);
 
             when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
@@ -586,18 +517,10 @@ public class MensalidadeServiceTest {
 
             LocalDate hoje = LocalDate.now();
 
-            Mensalidade mensalidade = new Mensalidade();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
             mensalidade.setId(1L);
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje);
             mensalidade.setDataVencimento(hoje.minusDays(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
             List<Mensalidade> mensalidades = List.of(mensalidade);
 
@@ -628,18 +551,10 @@ public class MensalidadeServiceTest {
 
             LocalDate hoje = LocalDate.now();
 
-            Mensalidade mensalidade = new Mensalidade();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
             mensalidade.setId(1L);
-            mensalidade.setValor(BigDecimal.valueOf(50));
             mensalidade.setDataCriacao(hoje.minusMonths(12));
-            mensalidade.setDataVencimento(hoje.plusDays(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
             List<Mensalidade> mensalidades = List.of(mensalidade);
 
@@ -661,18 +576,9 @@ public class MensalidadeServiceTest {
 
             LocalDate hoje = LocalDate.now();
 
-            Mensalidade mensalidade = new Mensalidade();
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
             mensalidade.setId(1L);
-            mensalidade.setValor(BigDecimal.valueOf(50));
-            mensalidade.setDataCriacao(hoje.minusMonths(12));
-            mensalidade.setDataVencimento(hoje.plusDays(1));
-            mensalidade.setUsuario(usuario);
-            mensalidade.setDiasTreino(3);
-            mensalidade.setDataPagamento(null);
-            mensalidade.setDataCancelamento(null);
-            mensalidade.setAtualizacoes(0);
-            mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
             AcessoAcademia acessoAcademia = new AcessoAcademia();
             acessoAcademia.setDiasAcesso(0);
@@ -709,7 +615,131 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setStatus(StatusMensalidade.PAGA);
+            mensalidade.setId(1L);
+
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+                .thenReturn(Optional.of(mensalidade));
+
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> mensalidadeService.cancelarMensalidade()
+            );
+
+            assertEquals("Apenas mensalidades pendentes podem ser canceladas!", exception.getMessage());
+
+            verify(mensalidadeRepository, never()).save(mensalidade);
+            verify(academiaRepository, never()).delete(any(AcessoAcademia.class));
+        }
+
+    }
+
+    @Nested
+    class excluirMensalidadeTest {
+
+        @Test
+        void deveExcluirMensalidadeComSucesso() {
+
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
+            mensalidade.setStatus(StatusMensalidade.PAGA);
+
+            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
+
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+                .thenReturn(Optional.of(mensalidade));
+
+            when(academiaRepository.findByUsuario(usuario))
+                .thenReturn(Optional.of(acessoAcademia));
+
+            mensalidadeService.excluirMensalidade();
+
+            verify(mensalidadeRepository).delete(mensalidade);
+            verify(academiaRepository).delete(acessoAcademia);
+        }
+
+        @Test
+        void deveLancarExcecaoApenasMensalidadesPagasOuCanceladasPodemSerExcluidas() {
+
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
+
+            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
+
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+                .thenReturn(Optional.of(mensalidade));
+
+            when(academiaRepository.findByUsuario(usuario))
+                .thenReturn(Optional.of(acessoAcademia));
+
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> mensalidadeService.excluirMensalidade()
+            );
+
+            assertEquals("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!", exception.getMessage());
+
+            verify(mensalidadeRepository, never()).delete(mensalidade);
+            verify(academiaRepository, never()).delete(acessoAcademia);
+        }
+
+    }
+
+    @Nested
+    class gerarProximaMensalidadeTest {
+
+        @Test
+        void deveGerarProximaMensalidadeComSucesso() {
+
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
+            mensalidade.setStatus(StatusMensalidade.PAGA);
             
+            MensalidadeResponseDTO resultado = mensalidadeService.gerarProximaMensalidade(mensalidade);
+
+            assertNotNull(resultado);
+
+            assertEquals(StatusMensalidade.PENDENTE, resultado.getStatus());
+            assertEquals(mensalidade.getDiasTreino(), resultado.getDiasTreino());
+
+            ArgumentCaptor<Mensalidade> captor = ArgumentCaptor.forClass(Mensalidade.class);
+
+            verify(mensalidadeRepository).save(captor.capture());
+
+            Mensalidade mensalidadeCapturada = captor.getValue();
+
+            assertEquals(StatusMensalidade.PENDENTE, mensalidadeCapturada.getStatus());
+            assertEquals(mensalidade.getUsuario(), mensalidadeCapturada.getUsuario());
+            assertEquals(mensalidade.getValor(), mensalidadeCapturada.getValor());
+        }
+
+        @Test
+        void deveLancarExcecaoMensalidadeAindaNaoPaga() {
+
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setId(1L);
+
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> mensalidadeService.gerarProximaMensalidade(mensalidade)
+            );
+
+            assertEquals("Mensalidade ainda não paga!", exception.getMessage());
+
+            verify(mensalidadeRepository, never()).save(any(Mensalidade.class));
         }
 
     }

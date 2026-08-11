@@ -273,7 +273,8 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
-        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+        AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
         mensalidade.getStatus() != StatusMensalidade.CANCELADA) {
@@ -304,11 +305,12 @@ public class MensalidadeService {
         mensalidadeNova.setDataCriacao(LocalDate.now());
         mensalidadeNova.setDataPagamento(null);
         mensalidadeNova.setDataVencimento(mensalidade.getDataVencimento().plusMonths(1));
+        mensalidadeNova.setDataCancelamento(null);
         mensalidadeNova.setDiasTreino(mensalidade.getDiasTreino());
         mensalidadeNova.setStatus(StatusMensalidade.PENDENTE);
         mensalidadeNova.setValor(mensalidade.getValor());
         mensalidadeNova.setUsuario(usuario);
-        mensalidade.setAtualizacoes(0);
+        mensalidadeNova.setAtualizacoes(0);
 
         mensalidadeRepository.save(mensalidadeNova);
         log.info("Nova mensalidade após pagamento de usuário {} criada", usuario.getEmail());

@@ -67,7 +67,7 @@ public class AcessoAcademiaService {
 
         validarAdvertenciasAluno(usuario);
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
@@ -116,17 +116,7 @@ public class AcessoAcademiaService {
         AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
             .orElseThrow(() -> new ResourceNotFound("Acesso não encontrado!"));
 
-        LocalDate hoje = LocalDate.now();
-
-        if (hoje.getDayOfWeek() == DayOfWeek.SATURDAY ||
-            hoje.getDayOfWeek() == DayOfWeek.SUNDAY) {
-            log.warn("Usuário {} tentou entrar na academia fechada!", usuario.getEmail());
-            throw new AcessoAcademiaException("A academia é fechada aos sábados e domingos!");
-        }
-        if (!acessoAcademia.getInicioSemana().equals(hoje.with(DayOfWeek.MONDAY))) {
-            acessoAcademia.setDiasAcesso(0);
-            acessoAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
-        }
+        LocalDate hoje = validarAcessoAcademiaFuncionario(acessoAcademia, usuario);
 
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
         acessoAcademia.setUltimoAcesso(hoje);
@@ -211,6 +201,35 @@ public class AcessoAcademiaService {
 
         if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
             throw new AcessoAcademiaException("Esse acesso não pertence a você!");
+        }
+
+        return hoje;
+    }
+
+    public LocalDate validarAcessoAcademiaFuncionario(AcessoAcademia acessoAcademia, Usuario usuario) {
+
+        LocalDate hoje = LocalDate.now();
+        LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
+        DayOfWeek dia = hoje.getDayOfWeek();
+
+        if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
+            log.warn("Usuário {} tentou entrar na academia no sábado e domingo", usuario.getEmail());
+            throw new AcessoAcademiaException("Academia não é aberta aos sábados e domingos!");
+        }
+
+        if (!inicioSemana.equals(acessoAcademia.getInicioSemana())) {
+            acessoAcademia.setInicioSemana(inicioSemana);
+            acessoAcademia.setDiasAcesso(0);
+        }   
+
+        if (LocalDate.now().equals(acessoAcademia.getUltimoAcesso())) {
+            log.warn("Usuário {} tentou acessar mais de uma vez no dia", usuario.getEmail());
+            throw new AcessoAcademiaException("Você já acessou a academia hoje!");
+        }
+
+        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
+            log.warn("Usuário {} tentou acessar com acesso inválido id: {}", usuario.getEmail(), acessoAcademia.getId());
+            throw new AcessoAcademiaException("Esse acesso de academia não pertence a você!");
         }
 
         return hoje;

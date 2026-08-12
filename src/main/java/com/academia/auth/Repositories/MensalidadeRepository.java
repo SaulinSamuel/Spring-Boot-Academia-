@@ -17,7 +17,7 @@ import com.academia.auth.Models.enums.StatusMensalidade;
 
 public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> {
     
-    Optional<Mensalidade> findTopByUsuarioOrderByIdDesc(Usuario usuario);
+    Optional<Mensalidade> findTopByUsuarioOrderByDataCriacaoDesc(Usuario usuario);
 
     Long countByStatus(StatusMensalidade status);
 
@@ -39,7 +39,7 @@ public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long> 
 
     boolean existsByUsuario(Usuario usuario);
 
-    boolean existsByUsuarioAndDataCancelamentoBetween(Usuario usuario, LocalDate inicioMes, LocalDate fimMes);
+    boolean existsByUsuarioAndDataCancelamentoBetween(Usuario usuario, LocalDate inicio, LocalDate fim);
 
     boolean existsByUsuarioAndStatus(Usuario usuario, StatusMensalidade status);
 

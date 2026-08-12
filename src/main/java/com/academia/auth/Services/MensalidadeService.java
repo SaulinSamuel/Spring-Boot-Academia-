@@ -91,7 +91,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em atualizar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
@@ -183,7 +183,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em pagar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
         
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE && 
@@ -242,7 +242,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em cancelar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
@@ -270,7 +270,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em excluir mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)

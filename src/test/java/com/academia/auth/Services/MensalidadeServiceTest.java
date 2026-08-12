@@ -193,7 +193,7 @@ public class MensalidadeServiceTest {
 
             Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(mensalidadeRepository.save(any(Mensalidade.class)))
@@ -218,7 +218,7 @@ public class MensalidadeServiceTest {
 
             MensalidadeRequestDTO dto = new MensalidadeRequestDTO(3);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.empty());
 
             ResourceNotFound ex = assertThrows(
@@ -246,7 +246,7 @@ public class MensalidadeServiceTest {
             mensalidade.setDataPagamento(hoje);
             mensalidade.setStatus(StatusMensalidade.PAGA);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -271,7 +271,7 @@ public class MensalidadeServiceTest {
   
             mensalidade.setAtualizacoes(1);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -462,7 +462,7 @@ public class MensalidadeServiceTest {
             Mensalidade mensalidade = criarMensalidadePendente(usuario);
             mensalidade.setId(1L);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             MensalidadeResponseDTO resultado = mensalidadeService.pagarMensalidade();
@@ -494,7 +494,7 @@ public class MensalidadeServiceTest {
 
             mensalidade.setStatus(StatusMensalidade.CANCELADA);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -590,7 +590,7 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(academiaRepository.findByUsuario(usuario))
@@ -619,7 +619,7 @@ public class MensalidadeServiceTest {
             mensalidade.setStatus(StatusMensalidade.PAGA);
             mensalidade.setId(1L);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -650,7 +650,7 @@ public class MensalidadeServiceTest {
 
             AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(academiaRepository.findByUsuario(usuario))
@@ -673,7 +673,7 @@ public class MensalidadeServiceTest {
 
             AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(academiaRepository.findByUsuario(usuario))

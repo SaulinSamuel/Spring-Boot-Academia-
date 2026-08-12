@@ -29,11 +29,12 @@ public class AvaliacaoFisicaMapper {
         dto.setAltura(avaliacaoFisica.getAltura());
         dto.setBraco(avaliacaoFisica.getBraco());
         dto.setCintura(avaliacaoFisica.getCintura());
+        dto.setPeso(avaliacaoFisica.getPeso());
         dto.setDataAvaliacao(avaliacaoFisica.getDataAvaliacao());
         dto.setId(avaliacaoFisica.getId());
         dto.setIdade(avaliacaoFisica.getIdade());
         dto.setMassaMuscular(avaliacaoFisica.getMassaMuscular());
-        dto.setNome(avaliacaoFisica.getAluno().getNome());
+        dto.setAluno(avaliacaoFisica.getAluno().getNome());
         dto.setAvaliador(avaliacaoFisica.getAvaliador().getNome());
         dto.setPeito(avaliacaoFisica.getPeito());
         dto.setPercentualGordura(avaliacaoFisica.getPercentualGordura());

@@ -37,8 +37,10 @@ public class AvaliacaoFisicaService {
     public AvaliacaoResponseDTO criarAvaliacaoFisica(AvaliacaoRequestDTO dto, Long id) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} criando avaliação fisíca", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou criar avaliação física sem permissão", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para criar avaliações físicas!");
         }
 
@@ -46,6 +48,7 @@ public class AvaliacaoFisicaService {
             .orElseThrow(() -> new ResourceNotFound("Aluno não encontrado!"));
 
         if (aluno.getRole() != RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou criar avaliação física em funcionários!", usuario.getEmail());
             throw new BusinessException("Não é permitido fazer avaliações físicas em funcionários!");
         }
 
@@ -57,6 +60,7 @@ public class AvaliacaoFisicaService {
             aluno, inicioMes, fimMes)
         )
         {
+            log.warn("Usuário {} tentou criar avaliação física em funcionário!", usuario.getEmail());
             throw new BusinessException("Avaliação física só pode ser feita uma vez no mês por aluno!");
         }
 

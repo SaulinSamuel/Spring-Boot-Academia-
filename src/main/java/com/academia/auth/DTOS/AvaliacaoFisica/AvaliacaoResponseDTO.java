@@ -17,9 +17,11 @@ public class AvaliacaoResponseDTO {
 
     private Double altura;
 
+    private Double peso;
+
     private Integer idade;
 
-    private String nome;
+    private String aluno;
 
     private String avaliador;
 

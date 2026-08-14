@@ -15,8 +15,6 @@ JpaSpecificationExecutor<AvaliacaoFisica>
 {
 
     boolean existsByAlunoAndDataAvaliacaoBetween(Usuario usuario, LocalDate inicio, LocalDate fim);
-    
-    AvaliacaoFisica findByAluno(Usuario usuario);
 
     Page<AvaliacaoFisica> findAllByAvaliador(Usuario usuario, Pageable pageable);
 

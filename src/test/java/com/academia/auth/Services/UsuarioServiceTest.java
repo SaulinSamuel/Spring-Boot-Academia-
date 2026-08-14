@@ -29,8 +29,10 @@ import com.academia.auth.DTOS.Usuario.UsuarioDeletarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
+import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
+import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
@@ -45,6 +47,9 @@ public class UsuarioServiceTest {
     
     @Mock
     private UsuarioAutenticadoService usuarioLogado;
+
+    @Mock
+    private AcessoAcademiaRepository acessoAcademiaRepository;
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -345,6 +350,7 @@ public class UsuarioServiceTest {
             ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
 
             verify(usuarioRepository).save(captor.capture());
+            verify(acessoAcademiaRepository).save(any(AcessoAcademia.class));
 
             Usuario usuarioCapturado = captor.getValue();
 

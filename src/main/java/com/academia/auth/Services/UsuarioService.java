@@ -1,5 +1,8 @@
 package com.academia.auth.Services;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,8 +16,10 @@ import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.UsuarioMapper;
+import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
+import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
@@ -27,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UsuarioService {
     
     private final UsuarioRepository usuarioRepository;
+    private final AcessoAcademiaRepository acessoAcademiaRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioAutenticadoService usuarioLogado;
 
@@ -99,6 +105,11 @@ public class UsuarioService {
 
         usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
 
+        if (usuarioPromovido.getAcessosAcademia() == null) {
+            AcessoAcademia acessoAcademia = criarAcessoAcademiaFuncionario(usuarioPromovido);
+            acessoAcademiaRepository.save(acessoAcademia);
+        }
+        
         usuarioRepository.save(usuarioPromovido);
         log.info("Usuário {} promovido a funcionário!", usuarioPromovido.getEmail());
 
@@ -173,6 +184,18 @@ public class UsuarioService {
 
         log.info("Usuário {} deletado", usuario.getEmail());
         usuarioRepository.delete(usuario);
+    }
+
+    private AcessoAcademia criarAcessoAcademiaFuncionario(Usuario usuario) {
+
+        AcessoAcademia acessosAcademia = new AcessoAcademia();
+        acessosAcademia.setUsuario(usuario);
+        acessosAcademia.setInicioSemana(LocalDate.now().with(DayOfWeek.MONDAY));
+        acessosAcademia.setDiasAcesso(0);
+        acessosAcademia.setNome(usuario.getNome());
+        usuario.setAcessosAcademia(acessosAcademia);
+
+        return acessosAcademia;
     }
 
 }

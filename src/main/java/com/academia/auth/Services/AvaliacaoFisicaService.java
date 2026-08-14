@@ -60,12 +60,12 @@ public class AvaliacaoFisicaService {
             aluno, inicioMes, fimMes)
         )
         {
-            log.warn("Usuário {} tentou criar avaliação física em funcionário!", usuario.getEmail());
+            log.warn("Usuário {} tentou criar avaliação física mais de uma vez no mês!", usuario.getEmail());
             throw new BusinessException("Avaliação física só pode ser feita uma vez no mês por aluno!");
         }
 
         AvaliacaoFisica avaliacaoFisica = AvaliacaoFisicaMapper.toEntity(dto);
-
+        
         avaliacaoFisica.setDataAvaliacao(hoje);
         avaliacaoFisica.setAluno(aluno);
         avaliacaoFisica.setAvaliador(usuario);
@@ -79,17 +79,20 @@ public class AvaliacaoFisicaService {
     public AvaliacaoResponseDTO editarAvaliacaoFisica(AvaliacaoRequestDTO dto, Long id) {
         
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em editar avaliação", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou editar avaliação sem permissão!", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para editar avaliações fisícas!");
         }
 
-        AvaliacaoFisica avaliacaoFisica  = avaliacaoFisicaRepository.findById(id)
+        AvaliacaoFisica avaliacaoFisica = avaliacaoFisicaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Avaliação fisíca não encontrada!"));
 
         if (!(usuario.getRole() == RoleUser.ROLE_ADMIN) && 
             !avaliacaoFisica.getAvaliador().getId().equals(usuario.getId())) 
         {
+            log.warn("Usuário {} tentou editar avaliação física sem permissão!", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para editar essa avaliação física!");
         }
 
@@ -103,6 +106,7 @@ public class AvaliacaoFisicaService {
         avaliacaoFisica.setPeso(dto.getPeso());
 
         avaliacaoFisicaRepository.save(avaliacaoFisica);
+        log.info("Avaliação física de aluno {} editada com sucesso!", avaliacaoFisica.getAluno().getEmail());
 
         return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);
     }
@@ -110,13 +114,16 @@ public class AvaliacaoFisicaService {
     public Page<AvaliacaoResponseDTO> buscarSuasAvaliacaoFisicaAlunos(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Aluno {} entrou em buscar suas avaliações físicas", usuario.getEmail());
 
         if (usuario.getRole() != RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou visualizar avaliações de alunos!", usuario.getEmail());
             throw new BusinessException("Apenas alunos podem visualizar suas avaliações físicas por aqui!");
         }
 
         Page<AvaliacaoFisica> avaliacoesFisicas = avaliacaoFisicaRepository.findAllByAluno(usuario, pageable);
 
+        log.info("Aluno {} visualizou suas avaliações com sucesso!", usuario.getEmail());
         return avaliacoesFisicas
             .map(AvaliacaoFisicaMapper::toDTO);
     }
@@ -124,8 +131,10 @@ public class AvaliacaoFisicaService {
     public Page<AvaliacaoResponseDTO> buscarSuasAvaliacoesFisicasCriadas(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em buscar suas avaliações físicas criadas", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Aluno {} tenteu visualizar avaliações físicas sem permissão!", usuario.getEmail());
             throw new BusinessException("Apenas funcionários e admins podem ver suas avaliações físicas criadas!");
         }
 
@@ -134,6 +143,7 @@ public class AvaliacaoFisicaService {
             pageable
         );
 
+        log.info("Usuário {} visualizou suas avaliações físicas criadas!", usuario.getEmail());
         return avaliacoesFisicas
             .map(AvaliacaoFisicaMapper::toDTO);
     }
@@ -149,8 +159,10 @@ public class AvaliacaoFisicaService {
     {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em buscar todas avaliações com filtro!", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou visualizar avaliações sem permissão!", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para visualizar todas as avaliações!");
         }
 
@@ -163,6 +175,7 @@ public class AvaliacaoFisicaService {
 
         Page<AvaliacaoFisica> avaliacoesFisicas = avaliacaoFisicaRepository.findAll(spec, pageable);
 
+        log.info("Usuário {} visualizou todas avaliações com sucesso!", usuario.getEmail());
         return avaliacoesFisicas
             .map(AvaliacaoFisicaMapper::toDTO);
     }
@@ -170,14 +183,17 @@ public class AvaliacaoFisicaService {
     public AvaliacaoResponseDTO buscarAvaliacaoFisicaPorId(Long id) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em buscar avaliação física por id", usuario.getEmail());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("Usuário {} tentou buscar avaliação física por id sem permissão", usuario.getEmail());
             throw new BusinessException("Você não tem permissão de visualizar essa avaliação física!");
         }
 
         AvaliacaoFisica avaliacaoFisica = avaliacaoFisicaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Avaliação física não encontrada!"));
             
+        log.info("Usuário {} visualizou avaliação física por id com sucesso!", usuario.getEmail());
         return AvaliacaoFisicaMapper.toDTO(avaliacaoFisica);       
     }
 
@@ -185,6 +201,7 @@ public class AvaliacaoFisicaService {
     public void excluirAvaliacaoFisica(Long id) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em excluir avaliação física", usuario.getEmail());
 
         AvaliacaoFisica avaliacaoFisica = avaliacaoFisicaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Avaliação física não encontrada!"));
@@ -193,10 +210,13 @@ public class AvaliacaoFisicaService {
         boolean isAvaliador = avaliacaoFisica.getAvaliador().getId().equals(usuario.getId());
     
         if (!isAdmin && !isAvaliador) {
+            log.warn("Usuário {} tentou excluir avaliação física sem permissão!", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para excluir essa avaliação física!");
         }
 
         avaliacaoFisicaRepository.delete(avaliacaoFisica);
+
+        log.info("Usuário {} deletou avaliação física com id: {} com sucesso!", usuario.getEmail(), avaliacaoFisica.getId());
     }
 
 }

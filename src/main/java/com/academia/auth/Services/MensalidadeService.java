@@ -48,6 +48,7 @@ public class MensalidadeService {
             throw new BusinessException("Você já possui mensalidades pendentes!");
         }
 
+        LocalDate hoje = LocalDate.now();
         LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
         LocalDate fimMes = LocalDate.now().withDayOfMonth(inicioMes.lengthOfMonth());
 
@@ -60,11 +61,17 @@ public class MensalidadeService {
 
         Mensalidade mensalidade = MensalidadeMapper.toEntity(dto);
 
-        AcessoAcademia acessosAcademia = new AcessoAcademia();
-        acessosAcademia.setUsuario(usuario);
-        acessosAcademia.setInicioSemana(LocalDate.now().with(DayOfWeek.MONDAY));
-        acessosAcademia.setDiasAcesso(0);
-        acessosAcademia.setNome(usuario.getNome());
+        if (usuario.getAcessosAcademia() == null) {
+
+            AcessoAcademia acessosAcademia = new AcessoAcademia();
+            acessosAcademia.setUsuario(usuario);
+            acessosAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
+            acessosAcademia.setDiasAcesso(0);
+            acessosAcademia.setNome(usuario.getNome());
+            usuario.setAcessosAcademia(acessosAcademia);
+
+            academiaRepository.save(acessosAcademia);
+        }
 
         mensalidade.setValor(valor);
         mensalidade.setDataCriacao(LocalDate.now());
@@ -77,7 +84,6 @@ public class MensalidadeService {
         mensalidade.setStatus(StatusMensalidade.PENDENTE);
 
         mensalidadeRepository.save(mensalidade);
-        academiaRepository.save(acessosAcademia);
 
         log.info("Mensalidade criada e salva para usuário {}", usuario.getEmail());
         log.info("Acesso da academia criado e salvo para usuário {}", usuario.getEmail());

@@ -49,7 +49,7 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
-        log.info("Usuário {} cadastrado com sucesso!", usuarioSalvo.getEmail());
+        log.info("Usuário {} cadastrado com sucesso!", usuarioSalvo.getEmail());    
 
         return UsuarioMapper.toDTO(usuarioSalvo);
     }
@@ -138,6 +138,7 @@ public class UsuarioService {
         usuarioRebaixado.setRole(RoleUser.ROLE_USER);
 
         usuarioRepository.save(usuarioRebaixado);
+        log.info("Usuário {} rebaixou usuário {} a usuário", usuario.getEmail(), usuarioRebaixado.getEmail());
         
         return UsuarioMapper.toDTO(usuarioRebaixado);
     }
@@ -153,10 +154,6 @@ public class UsuarioService {
         }
 
         Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
-
-        if(usuarios.isEmpty()) {
-            throw new ResourceNotFound("Nenhum usuário encontrado!");
-        }
 
         log.info("Usuário {} listou usuários com sucesso!", usuario.getEmail());
         return usuarios

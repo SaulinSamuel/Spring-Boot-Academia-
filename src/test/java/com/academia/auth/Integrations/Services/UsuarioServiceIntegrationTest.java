@@ -498,6 +498,68 @@ class UsuarioServiceIntegrationTest {
     }
 
     @Nested
+    class listarUsuariosPorNomeTest {
+
+        private Usuario usuario;
+
+        @BeforeEach
+        void configurarUsuarioAutenticado() {
+
+            usuario = criarUsuario();
+            usuario.setSenha(passwordEncoder.encode("091812"));
+
+            usuarioRepository.save(usuario);
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                usuario,
+                null,
+                usuario.getAuthorities()
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+
+        @AfterEach
+        void limparSecurityContext() {
+            SecurityContextHolder.clearContext();
+        }
+
+        @Test
+        void deveListarUsuariosPaginadosPorNome() {
+
+            usuario.setRole(RoleUser.ROLE_FUNCIONARIO);
+
+            Usuario usuario2 = criarUsuario();
+            usuario2.setEmail("teste1@gmail.com");
+
+            Usuario usuario3 = criarUsuario();
+            usuario3.setEmail("teste2@gmail.com");
+
+            List<Usuario> usuarios = List.of(usuario2, usuario3);
+
+            usuarioRepository.saveAll(usuarios);
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            Page<UsuarioResponseDTO> resultado = usuarioService.listarUsuariosPorNome(
+                "sau", 
+                pageable
+            );
+
+            assertThat(resultado).isNotEmpty();
+
+            assertThat(resultado.getContent()).extracting(UsuarioResponseDTO::getId)
+                .containsExactlyInAnyOrder(usuario.getId(), usuario2.getId(), usuario3.getId());
+
+            Page<Usuario> usuariosSalvos = usuarioRepository.findAllByNomeContainingIgnoreCase("sau", pageable);
+
+            assertThat(usuariosSalvos.getContent()).extracting(Usuario::getId)
+                .containsExactlyInAnyOrder(usuario.getId(), usuario2.getId(), usuario3.getId());
+        }
+
+    }
+
+    @Nested
     class listarMeusDadosTest {
 
         private Usuario usuario;

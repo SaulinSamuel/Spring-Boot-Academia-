@@ -1,5 +1,7 @@
 package com.academia.auth.Controllers;
 
+import java.math.BigDecimal;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
 import com.academia.auth.Services.MensalidadeService;
@@ -59,9 +62,18 @@ public class MensalidadeController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @GetMapping("/buscar")
-    public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
+    public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidadesComFiltro(
+        MensalidadeFilterDatesDTO filterDatesDTO,
+        @RequestParam(required = false) Integer diasTreino,
+        @RequestParam(required = false) BigDecimal valor,
+        @PageableDefault(size = 12) Pageable pageable) {
 
-        Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarTodasMensalidades(pageable);
+        Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarTodasMensalidadesComFiltro(
+            valor, 
+            diasTreino, 
+            filterDatesDTO, 
+            pageable
+        );
 
         return ResponseEntity.ok(mensalidades);
     }

@@ -1,5 +1,6 @@
 package com.academia.auth.Services;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +55,19 @@ public class UsuarioServiceTest {
 
     @InjectMocks
     private UsuarioService usuarioService;
+
+    private Usuario criarUsuario() {
+
+        Usuario usuario = new Usuario();
+
+        usuario.setId(1L);
+        usuario.setNome("Saulin");
+        usuario.setEmail("saulo@gmail.com");
+        usuario.setSenha("091812");
+        usuario.setRole(RoleUser.ROLE_USER);
+        
+        return usuario;
+    }
 
     @Nested
     class CadastrarUsuarioTest {
@@ -542,6 +557,66 @@ public class UsuarioServiceTest {
 
             assertEquals("Você não tem permissão para ver os usuários!", exception.getMessage());
         }
+    }
+
+    @Nested
+    class listarUsuariosPorNomeTest {
+
+        private Usuario usuario;
+
+        @BeforeEach
+        void configurarUsuarioLogado() {
+
+            usuario = criarUsuario();
+            
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+        }
+
+        @Test
+        void deveListarUsuariosPorNomeComSucesso() {
+
+            usuario.setRole(RoleUser.ROLE_FUNCIONARIO);
+
+            Usuario usuario2 = criarUsuario();  
+            usuario2.setEmail("teste@gmail.com");
+
+            Usuario usuario3 = criarUsuario();
+            usuario3.setEmail("teste2@gmail.com");
+
+            List<Usuario> usuarios = List.of(usuario, usuario2, usuario3);
+            Page<Usuario> page = new PageImpl<>(usuarios);
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            when(usuarioRepository.findAllByNomeContainingIgnoreCase(
+                "sau",
+                pageable
+            )).thenReturn(page);
+
+            Page<UsuarioResponseDTO> resultado = usuarioService.listarUsuariosPorNome("sau", pageable);
+
+            assertThat(resultado).isNotEmpty();
+            
+            assertThat(resultado.getContent()).extracting(UsuarioResponseDTO::getId)
+                .containsExactlyInAnyOrder(usuario.getId(), usuario2.getId(), usuario3.getId());
+        } 
+
+        @Test
+        void deveLancarExcecaoSemPermissaoParaVisualizarTodosUsuarios() {
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> usuarioService.listarUsuariosPorNome("sau", pageable)
+            );
+
+            assertThat(exception.getMessage()).isEqualTo("Você não tem permissão para visualizar todos usuarios!");
+
+            verify(usuarioRepository, never()).findAllByNomeContainingIgnoreCase("sau", pageable);
+        }
+
     }
 
     @Nested

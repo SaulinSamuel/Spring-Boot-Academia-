@@ -7,9 +7,11 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
@@ -23,6 +25,7 @@ import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
+import com.academia.auth.Specifications.MensalidadeSpecification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -139,24 +142,28 @@ public class MensalidadeService {
             .map(MensalidadeMapper::toDTO);
     }
 
-    public Page<MensalidadeResponseDTO> buscarTodasMensalidades(Pageable pageable) {
+    public Page<MensalidadeResponseDTO> buscarTodasMensalidadesComFiltro(
+        BigDecimal valor,
+        Integer diasTreino,
+        MensalidadeFilterDatesDTO filterDatesDTO,    
+        Pageable pageable) 
+    {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
-        log.info("Admin {} entrou em buscar todas as mensalidades", usuario.getEmail());
+        log.info("Usuário {} entrou em buscar todas as mensalidades", usuario.getEmail());
 
-        if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
             log.warn("Usuário {} tentou entrar sem permissão em método buscarTodasMensalidades", usuario.getEmail());
             throw new BusinessException("Você não tem permissão para visualizar as mensalidades!");
         }
 
-        Page<Mensalidade> mensalidades = mensalidadeRepository.findAll(pageable);
+        Specification<Mensalidade> specification = MensalidadeSpecification.filterDates(filterDatesDTO);
+        specification.and(MensalidadeSpecification.diasTreino(diasTreino));
+        specification.and(MensalidadeSpecification.valor(valor));
 
-        if (mensalidades.isEmpty()) {
-            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
-            throw new ResourceNotFound("Mensalidades não encontradas!");
-        }
+        Page<Mensalidade> mensalidades = mensalidadeRepository.findAll(specification, pageable);
 
-        log.info("Admin {} buscou todas mensalidades", usuario.getEmail());
+        log.info("Usuário {} buscou todas mensalidades", usuario.getEmail());
         return mensalidades
             .map(MensalidadeMapper::toDTO);
     }
@@ -264,9 +271,11 @@ public class MensalidadeService {
         mensalidadeRepository.save(mensalidade);
         log.info("Mensalidade {} cancelada", mensalidade.getId());
 
-        academiaRepository.delete(acessoAcademia);
-        log.info("Acesso {} deletado", acessoAcademia.getId());
-
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            academiaRepository.delete(acessoAcademia);
+            log.info("Acesso {} deletado", acessoAcademia.getId());
+        }
+        
         return MensalidadeMapper.toDTO(mensalidade);
     }
 

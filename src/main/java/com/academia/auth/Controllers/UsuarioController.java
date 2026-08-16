@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.academia.auth.DTOS.Usuario.UsuarioAtualizarDTO;
@@ -45,6 +46,18 @@ public class UsuarioController {
         @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
 
         Page<UsuarioResponseDTO> usuarios = usuarioService.listarUsuarios(pageable);
+
+        return ResponseEntity.ok(usuarios);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @GetMapping("/pesquisar")
+    public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuariosPorNome(
+        @PageableDefault(size = 12, sort = "nome") Pageable pageable,
+        @RequestParam(required = false) String nome
+    ) {
+
+        Page<UsuarioResponseDTO> usuarios = usuarioService.listarUsuariosPorNome(nome, pageable);
 
         return ResponseEntity.ok(usuarios);
     }

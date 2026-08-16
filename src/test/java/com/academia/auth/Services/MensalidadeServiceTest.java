@@ -27,7 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
@@ -365,11 +367,29 @@ public class MensalidadeServiceTest {
 
             Pageable pageable = PageRequest.of(0, 10);
             Page<Mensalidade> page = new PageImpl<>(mensalidades);
+            
+            MensalidadeFilterDatesDTO filterDatesDTO = new MensalidadeFilterDatesDTO(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+            Integer diasTreino = 3;
+            BigDecimal valor = BigDecimal.valueOf(30);
 
-            when(mensalidadeRepository.findAll(pageable))
+            when(mensalidadeRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(page);
 
-            Page<MensalidadeResponseDTO> resultado = mensalidadeService.buscarTodasMensalidades(pageable);
+            Page<MensalidadeResponseDTO> resultado = mensalidadeService.buscarTodasMensalidadesComFiltro(
+                valor, 
+                diasTreino, 
+                filterDatesDTO, 
+                pageable
+            );
 
             assertNotNull(resultado);
 
@@ -386,9 +406,26 @@ public class MensalidadeServiceTest {
 
             Pageable pageable = PageRequest.of(0, 10);
 
+            MensalidadeFilterDatesDTO filterDatesDTO = new MensalidadeFilterDatesDTO(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+            Integer diasTreino = 3;
+            BigDecimal valor = BigDecimal.valueOf(30);
+
             BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> mensalidadeService.buscarTodasMensalidades(pageable)
+                () -> mensalidadeService.buscarTodasMensalidadesComFiltro(
+                    valor, 
+                    diasTreino, 
+                    filterDatesDTO, 
+                    pageable)
             );
 
             assertEquals("Você não tem permissão para visualizar as mensalidades!", exception.getMessage());

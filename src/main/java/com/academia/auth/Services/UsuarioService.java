@@ -160,6 +160,23 @@ public class UsuarioService {
             .map(UsuarioMapper::toDTO);
     }
 
+    public Page<UsuarioResponseDTO> listarUsuariosPorNome(
+        String nome,
+        Pageable pageable) 
+    {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para visualizar todos usuarios!");
+        }
+
+        Page<Usuario> usuarios = usuarioRepository.findAllByNomeContainingIgnoreCase(nome, pageable);
+
+        return usuarios
+            .map(UsuarioMapper::toDTO);
+    }
+
     public UsuarioResponseDTO meusDados() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();

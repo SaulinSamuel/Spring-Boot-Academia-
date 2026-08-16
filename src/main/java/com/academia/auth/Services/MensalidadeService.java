@@ -55,7 +55,7 @@ public class MensalidadeService {
         LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
         LocalDate fimMes = LocalDate.now().withDayOfMonth(inicioMes.lengthOfMonth());
 
-        if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween (usuario, inicioMes, fimMes)) {
+        if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween(usuario, inicioMes, fimMes)) {
             log.warn("Usuário {} tentou cancelar mais de uma mensalidade no mês.", usuario.getEmail());
             throw new BusinessException("Você já cancelou uma mensalidade esse mês!");
         }
@@ -131,11 +131,6 @@ public class MensalidadeService {
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAllByUsuario(usuario, pageable);
 
-        if (mensalidades.isEmpty()) {
-            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
-            throw new ResourceNotFound("Mensalidades não encontradas!");
-        }
-
         log.info("Usuário {} buscou suas mensalidades", usuario.getEmail());
 
         return mensalidades
@@ -158,8 +153,8 @@ public class MensalidadeService {
         }
 
         Specification<Mensalidade> specification = MensalidadeSpecification.filterDates(filterDatesDTO);
-        specification.and(MensalidadeSpecification.diasTreino(diasTreino));
-        specification.and(MensalidadeSpecification.valor(valor));
+        specification = specification.and(MensalidadeSpecification.diasTreino(diasTreino));
+        specification = specification.and(MensalidadeSpecification.valor(valor));
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAll(specification, pageable);
 
@@ -179,11 +174,6 @@ public class MensalidadeService {
         }
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findByUsuarioNomeContainingIgnoreCase(pageable, nome);
-
-        if (mensalidades.isEmpty()) {
-            log.warn("Mensalidades não encontradas para usuário {}", usuario.getEmail());
-            throw new ResourceNotFound("Mensalidades não encontradas!");
-        }
 
         log.info("Usuário {} pesquisou mensalidades!", usuario.getEmail());
         return mensalidades
@@ -214,6 +204,37 @@ public class MensalidadeService {
         
         gerarProximaMensalidade(mensalidade);
 
+        return MensalidadeMapper.toDTO(mensalidade);
+    }
+
+    @Transactional
+    public MensalidadeResponseDTO cancelarMensalidade() {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em cancelar mensalidade", usuario.getEmail());
+
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
+
+        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
+            log.warn("Usuário {} tentou cancelar mensalidade não pendente!", usuario.getEmail());
+            throw new BusinessException("Apenas mensalidades pendentes podem ser canceladas!");
+        }
+
+        mensalidade.setStatus(StatusMensalidade.CANCELADA);
+        mensalidade.setDataCancelamento(LocalDate.now());     
+
+        mensalidadeRepository.save(mensalidade);
+        log.info("Mensalidade {} cancelada", mensalidade.getId());
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
+
+            academiaRepository.delete(acessoAcademia);
+            log.info("Acesso {} deletado", acessoAcademia.getId());
+        }
+        
         return MensalidadeMapper.toDTO(mensalidade);
     }
 
@@ -250,36 +271,6 @@ public class MensalidadeService {
     }
 
     @Transactional
-    public MensalidadeResponseDTO cancelarMensalidade() {
-
-        Usuario usuario = usuarioLogado.usuarioLogado();
-        log.info("Usuário {} entrou em cancelar mensalidade", usuario.getEmail());
-
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
-            .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
-
-        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
-            log.warn("Usuário {} tentou cancelar mensalidade não pendente!", usuario.getEmail());
-            throw new BusinessException("Apenas mensalidades pendentes podem ser canceladas!");
-        }
-
-        mensalidade.setStatus(StatusMensalidade.CANCELADA);
-        mensalidade.setDataCancelamento(LocalDate.now());
-        AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
-            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
-
-        mensalidadeRepository.save(mensalidade);
-        log.info("Mensalidade {} cancelada", mensalidade.getId());
-
-        if (usuario.getRole() == RoleUser.ROLE_USER) {
-            academiaRepository.delete(acessoAcademia);
-            log.info("Acesso {} deletado", acessoAcademia.getId());
-        }
-        
-        return MensalidadeMapper.toDTO(mensalidade);
-    }
-
-    @Transactional
     public void excluirMensalidade() {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -287,9 +278,6 @@ public class MensalidadeService {
 
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
-
-        AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
-            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
         mensalidade.getStatus() != StatusMensalidade.CANCELADA) {
@@ -299,7 +287,6 @@ public class MensalidadeService {
         }
 
         mensalidadeRepository.delete(mensalidade);
-        academiaRepository.delete(acessoAcademia);
 
         log.info("Mensalidade {} excluída", mensalidade.getId());
     }

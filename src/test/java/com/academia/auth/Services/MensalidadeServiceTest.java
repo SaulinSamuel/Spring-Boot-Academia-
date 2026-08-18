@@ -379,13 +379,11 @@ public class MensalidadeServiceTest {
                 null
             );
             Integer diasTreino = 3;
-            BigDecimal valor = BigDecimal.valueOf(30);
 
             when(mensalidadeRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(page);
 
             Page<MensalidadeResponseDTO> resultado = mensalidadeService.buscarTodasMensalidadesComFiltro(
-                valor, 
                 diasTreino, 
                 filterDatesDTO, 
                 pageable
@@ -417,12 +415,10 @@ public class MensalidadeServiceTest {
                 null
             );
             Integer diasTreino = 3;
-            BigDecimal valor = BigDecimal.valueOf(30);
 
             BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> mensalidadeService.buscarTodasMensalidadesComFiltro(
-                    valor, 
                     diasTreino, 
                     filterDatesDTO, 
                     pageable)

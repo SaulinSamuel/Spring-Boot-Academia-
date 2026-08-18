@@ -1,13 +1,13 @@
 package com.academia.auth.Controllers;
 
-import java.math.BigDecimal;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,8 +24,10 @@ import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
 import com.academia.auth.Services.MensalidadeService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
+@Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/mensalidade")
@@ -53,7 +55,7 @@ public class MensalidadeController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @GetMapping("/me")
-    public ResponseEntity<Page<MensalidadeResponseDTO>> buscarSuasMensalidades(@PageableDefault(size = 12) Pageable pageable) {
+    public ResponseEntity<Page<MensalidadeResponseDTO>> buscarSuasMensalidades(@PageableDefault(size = 12, sort = "valor") Pageable pageable) {
 
         Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarSuasMensalidades(pageable);
 
@@ -64,12 +66,10 @@ public class MensalidadeController {
     @GetMapping("/buscar")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidadesComFiltro(
         MensalidadeFilterDatesDTO filterDatesDTO,
-        @RequestParam(required = false) Integer diasTreino,
-        @RequestParam(required = false) BigDecimal valor,
-        @PageableDefault(size = 12) Pageable pageable) {
+        @RequestParam(required = false) @Positive Integer diasTreino,
+        @PageableDefault(size = 12, sort = "dataVencimento", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<MensalidadeResponseDTO> mensalidades = mensalidadeService.buscarTodasMensalidadesComFiltro(
-            valor, 
             diasTreino, 
             filterDatesDTO, 
             pageable
@@ -96,7 +96,7 @@ public class MensalidadeController {
 
         MensalidadeResponseDTO mensalidade = mensalidadeService.pagarMensalidade();
 
-        return ResponseEntity.ok(mensalidade);
+        return ResponseEntity.ok(mensalidade);  
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")

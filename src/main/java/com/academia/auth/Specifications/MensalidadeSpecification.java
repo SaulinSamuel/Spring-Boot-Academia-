@@ -1,6 +1,5 @@
 package com.academia.auth.Specifications;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,21 +26,6 @@ public class MensalidadeSpecification {
             );
         };
     }
-
-    public static Specification<Mensalidade> valor(BigDecimal valor) {
-
-        return (root, query, cb) -> {
-
-            if (valor == null) {
-
-                return null;
-            }
-
-            return cb.equal(
-                root.get("valor"), valor
-            );
-        };
-    }   
 
     public static Specification<Mensalidade> filterDates(
         MensalidadeFilterDatesDTO filter) 

@@ -415,7 +415,6 @@ public class MensalidadeServiceIntegrationTest {
 
             Pageable pageable = PageRequest.of(0, 10);
 
-            BigDecimal valor = BigDecimal.valueOf(45);
             Integer diasTreino = 3;
             MensalidadeFilterDatesDTO filterDatesDTO = new MensalidadeFilterDatesDTO(
                 null, 
@@ -429,7 +428,6 @@ public class MensalidadeServiceIntegrationTest {
             );
 
             Page<MensalidadeResponseDTO> resultado = mensalidadeService.buscarTodasMensalidadesComFiltro(
-                valor, 
                 diasTreino, 
                 filterDatesDTO, 
                 pageable
@@ -446,7 +444,6 @@ public class MensalidadeServiceIntegrationTest {
 
             Pageable pageable = PageRequest.of(0, 10);
 
-            BigDecimal valor = BigDecimal.valueOf(45);
             Integer diasTreino = 3;
             MensalidadeFilterDatesDTO filterDatesDTO = new MensalidadeFilterDatesDTO(
                 null, 
@@ -461,7 +458,7 @@ public class MensalidadeServiceIntegrationTest {
 
             BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> mensalidadeService.buscarTodasMensalidadesComFiltro(valor, diasTreino, filterDatesDTO, pageable)
+                () -> mensalidadeService.buscarTodasMensalidadesComFiltro(diasTreino, filterDatesDTO, pageable)
             );
 
             assertThat(exception.getMessage()).isEqualTo("Você não tem permissão para visualizar as mensalidades!");

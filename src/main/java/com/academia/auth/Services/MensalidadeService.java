@@ -138,7 +138,6 @@ public class MensalidadeService {
     }
 
     public Page<MensalidadeResponseDTO> buscarTodasMensalidadesComFiltro(
-        BigDecimal valor,
         Integer diasTreino,
         MensalidadeFilterDatesDTO filterDatesDTO,    
         Pageable pageable) 
@@ -154,7 +153,6 @@ public class MensalidadeService {
 
         Specification<Mensalidade> specification = MensalidadeSpecification.filterDates(filterDatesDTO);
         specification = specification.and(MensalidadeSpecification.diasTreino(diasTreino));
-        specification = specification.and(MensalidadeSpecification.valor(valor));
 
         Page<Mensalidade> mensalidades = mensalidadeRepository.findAll(specification, pageable);
 

@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import com.academia.auth.Security.CustomUserDetailsService;
 import com.academia.auth.Security.JwtAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -59,6 +60,16 @@ public class SecurityConfig {
                 .requestMatchers("/historico-acesso/**").authenticated()
                 .requestMatchers("/avaliacao-fisica/**").authenticated()
                 .anyRequest().authenticated()
+            )
+
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(
+                    (request, response, authException) ->
+                        response.sendError(
+                            HttpServletResponse.SC_UNAUTHORIZED,
+                            "Não autenticado"
+                        )
+                )
             )
 
             .addFilterBefore(

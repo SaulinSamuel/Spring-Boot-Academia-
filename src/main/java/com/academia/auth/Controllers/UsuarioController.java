@@ -90,7 +90,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
     @DeleteMapping
-    public ResponseEntity<Void> deletarSeuUsuario(@Valid @RequestBody UsuarioDeletarDTO dto) {
+    public ResponseEntity<Void> deletarUsuario(@Valid @RequestBody UsuarioDeletarDTO dto) {
 
         usuarioService.deletarUsuario(dto);
 

@@ -84,6 +84,40 @@ public class UsuarioService {
         return UsuarioMapper.toDTO(usuario);
     }
 
+    public Page<UsuarioResponseDTO> listarUsuarios(Pageable pageable) {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+        log.info("Usuário {} entrou em listar usuários", usuario.getEmail());
+    
+        if(usuario.getRole() == RoleUser.ROLE_USER) {
+            log.warn("usuário {} tentou visualizar todos os usuários", usuario.getEmail());
+            throw new BusinessException("Você não tem permissão para ver os usuários!");
+        }
+
+        Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
+
+        log.info("Usuário {} listou usuários com sucesso!", usuario.getEmail());
+        return usuarios
+            .map(UsuarioMapper::toDTO);
+    }
+
+    public Page<UsuarioResponseDTO> listarUsuariosPorNome(
+        String nome,
+        Pageable pageable) 
+    {
+
+        Usuario usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Você não tem permissão para visualizar todos usuarios!");
+        }
+
+        Page<Usuario> usuarios = usuarioRepository.findAllByNomeContainingIgnoreCase(nome, pageable);
+
+        return usuarios
+            .map(UsuarioMapper::toDTO);
+    }
+
     @Transactional
     public UsuarioResponseDTO promoverUsuarioAFuncionario(Long id) {
 
@@ -103,7 +137,7 @@ public class UsuarioService {
             throw new BusinessException("Você não tem permissão para promover funcionários!");
         }
 
-        usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
+        usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);    
 
         if (usuarioPromovido.getAcessosAcademia() == null) {
             AcessoAcademia acessoAcademia = criarAcessoAcademiaFuncionario(usuarioPromovido);
@@ -141,40 +175,6 @@ public class UsuarioService {
         log.info("Usuário {} rebaixou usuário {} a usuário", usuario.getEmail(), usuarioRebaixado.getEmail());
         
         return UsuarioMapper.toDTO(usuarioRebaixado);
-    }
-
-    public Page<UsuarioResponseDTO> listarUsuarios(Pageable pageable) {
-
-        Usuario usuario = usuarioLogado.usuarioLogado();
-        log.info("Usuário {} entrou em listar usuários", usuario.getEmail());
-    
-        if(usuario.getRole() == RoleUser.ROLE_USER) {
-            log.warn("usuário {} tentou visualizar todos os usuários", usuario.getEmail());
-            throw new BusinessException("Você não tem permissão para ver os usuários!");
-        }
-
-        Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
-
-        log.info("Usuário {} listou usuários com sucesso!", usuario.getEmail());
-        return usuarios
-            .map(UsuarioMapper::toDTO);
-    }
-
-    public Page<UsuarioResponseDTO> listarUsuariosPorNome(
-        String nome,
-        Pageable pageable) 
-    {
-
-        Usuario usuario = usuarioLogado.usuarioLogado();
-
-        if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new BusinessException("Você não tem permissão para visualizar todos usuarios!");
-        }
-
-        Page<Usuario> usuarios = usuarioRepository.findAllByNomeContainingIgnoreCase(nome, pageable);
-
-        return usuarios
-            .map(UsuarioMapper::toDTO);
     }
 
     public UsuarioResponseDTO meusDados() {

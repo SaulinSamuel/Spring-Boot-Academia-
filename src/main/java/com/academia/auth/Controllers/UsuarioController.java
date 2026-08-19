@@ -24,7 +24,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
@@ -32,7 +31,7 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
-    @PutMapping("/editar")
+    @PutMapping("/atualizar")
     public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@Valid @RequestBody UsuarioAtualizarDTO dto) {
 
         UsuarioResponseDTO usuario = usuarioService.atualizarUsuario(dto);

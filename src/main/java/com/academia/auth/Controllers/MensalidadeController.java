@@ -108,7 +108,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidade);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER')")
     @DeleteMapping("/deletar")
     public ResponseEntity<Void> excluirMensalidade() {
 

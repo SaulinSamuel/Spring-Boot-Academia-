@@ -37,7 +37,7 @@ public class UsuarioService {
     private final UsuarioAutenticadoService usuarioLogado;
 
     @Transactional
-    public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO dto) {
+    public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO dto) { 
 
         if(usuarioRepository.existsByEmail(dto.getEmail())) {
             log.warn("Tentativa de cadastro de usuário já cadastrado!");

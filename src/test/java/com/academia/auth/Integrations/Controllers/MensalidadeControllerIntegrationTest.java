@@ -1,12 +1,14 @@
 package com.academia.auth.Integrations.Controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
@@ -27,10 +29,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
+import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Security.JwtService;
@@ -49,6 +53,9 @@ public class MensalidadeControllerIntegrationTest {
 
     @Autowired
     private MensalidadeRepository mensalidadeRepository;
+
+    @Autowired
+    private AcessoAcademiaRepository acessoAcademiaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -98,6 +105,21 @@ public class MensalidadeControllerIntegrationTest {
         return m;
     }
  
+    private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
+
+        LocalDate hoje = LocalDate.now();
+
+        AcessoAcademia acessoAcademia = new AcessoAcademia();
+
+        acessoAcademia.setDiasAcesso(0);
+        acessoAcademia.setInicioSemana(hoje);
+        acessoAcademia.setUltimoAcesso(hoje);
+        acessoAcademia.setUsuario(usuario);
+        acessoAcademia.setNome(usuario.getNome());
+
+        return acessoAcademia;
+    }
+
     private String gerarToken(Usuario usuario) {
         return jwtService.gerarToken(usuario);
     }   
@@ -471,14 +493,107 @@ public class MensalidadeControllerIntegrationTest {
             mockMvc.perform(
                 patch("/mensalidade/pagar")
                 .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                            {
-                            }
-                        """)
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PAGA"));
+        }
+
+        @Test
+        void deveImpedirPagarMensalidadesNaoPagas() throws Exception {
+
+            Mensalidade mensalidade = criarMensalidadePendente(usuario);
+            mensalidade.setStatus(StatusMensalidade.CANCELADA);
+
+            mensalidadeRepository.save(mensalidade);
+
+            mockMvc.perform(
+                patch("/mensalidade/pagar")
+                .header("Authorization", "Bearer " + token)
+            )
+            .andExpect(status().isBadRequest());
+        }
+
+    }
+
+    @Nested
+    class cancelarMensalidadeTest {
+
+        private Usuario usuario;
+        private Mensalidade mensalidade;
+
+        @BeforeEach
+        void prepararSetup() {
+
+            usuario = criarUsuario();
+
+            mensalidade = criarMensalidadePendente(usuario);
+            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
+
+            mensalidadeRepository.save(mensalidade);
+            acessoAcademiaRepository.save(acessoAcademia);
+        }
+
+        @Test
+        void deveCancelarMensalidadeComSucesso() throws Exception {
+
+            mockMvc.perform(
+                patch("/mensalidade/cancelar")
+                .with(user(usuario))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("CANCELADA"));
+        }
+
+        @Test
+        void deveImpedirCancelarMensalidadeNaoPendente() throws Exception {
+
+            mensalidade.setStatus(StatusMensalidade.ATRASADA);
+
+            mockMvc.perform(
+                patch("/mensalidade/cancelar")
+                .with(user(usuario))
+            )
+            .andExpect(status().isBadRequest());
+        }
+
+    }
+
+    @Nested
+    class excluirMensalidadeTest {
+
+        private Usuario usuario;
+        private Mensalidade mensalidade;
+
+        @BeforeEach
+        void prepararSetup() {
+
+            usuario = criarUsuario();
+
+            mensalidade = criarMensalidadePendente(usuario);
+
+            mensalidadeRepository.save(mensalidade);
+        }
+
+        @Test
+        void deveExcluirMensalidadeComSucesso() throws Exception {
+
+            mensalidade.setStatus(StatusMensalidade.PAGA);
+
+            mockMvc.perform(
+                delete("/mensalidade/deletar")
+                .with(user(usuario))
+            )
+            .andExpect(status().isNoContent());
+        }   
+
+        @Test
+        void deveImpedirExclusaoDeMensalidadeNaoPagaOuCancelada() throws Exception {
+
+            mockMvc.perform(
+                delete("/mensalidade/deletar")
+                .with(user(usuario))
+            )
+            .andExpect(status().isBadRequest());
         }
 
     }

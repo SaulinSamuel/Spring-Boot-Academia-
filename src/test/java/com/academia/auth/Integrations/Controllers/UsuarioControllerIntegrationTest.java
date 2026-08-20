@@ -203,7 +203,7 @@ public class UsuarioControllerIntegrationTest {
                 get("/usuario/listar")
                 .with(user(usuario))
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isForbidden());
         }
 
     }
@@ -256,7 +256,7 @@ public class UsuarioControllerIntegrationTest {
                 get("/usuario/pesquisar")
                 .with(user(usuario))
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isForbidden());
         }
     
     }   
@@ -328,7 +328,7 @@ public class UsuarioControllerIntegrationTest {
                 patch("/usuario/" + usuarioPromovido.getId() + "/promover-funcionario")
                 .with(user(usuario))
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isForbidden());
         }
 
         @Test
@@ -387,7 +387,7 @@ public class UsuarioControllerIntegrationTest {
                 patch("/usuario/" + usuarioRebaixado.getId() + "/rebaixar-usuario")
                 .with(user(usuario))
             )
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isForbidden());
         }
 
         @Test

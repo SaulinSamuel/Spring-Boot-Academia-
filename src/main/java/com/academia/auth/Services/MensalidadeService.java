@@ -5,6 +5,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
+import com.academia.auth.Events.MensalidadeStatusAlteradoEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.MensalidadeMapper;
@@ -38,6 +40,8 @@ public class MensalidadeService {
     private final MensalidadeRepository mensalidadeRepository;
     private final UsuarioAutenticadoService usuarioLogado;
     private final AcessoAcademiaRepository academiaRepository;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public MensalidadeResponseDTO criarMensalidade(MensalidadeRequestDTO dto) {
@@ -71,9 +75,10 @@ public class MensalidadeService {
             acessosAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
             acessosAcademia.setDiasAcesso(0);
             acessosAcademia.setNome(usuario.getNome());
-            usuario.setAcessosAcademia(acessosAcademia);
-
+            
             academiaRepository.save(acessosAcademia);
+            
+            usuario.setAcessosAcademia(acessosAcademia);
         }
 
         mensalidade.setValor(valor);
@@ -100,7 +105,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em atualizar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
@@ -184,7 +189,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em pagar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
         
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE && 
@@ -195,9 +200,13 @@ public class MensalidadeService {
 
         mensalidade.setStatus(StatusMensalidade.PAGA);
         mensalidade.setDataPagamento(LocalDate.now());
-        mensalidade.setAtualizacoes(0);
-
+        
         mensalidadeRepository.save(mensalidade);
+
+        applicationEventPublisher.publishEvent(
+            new MensalidadeStatusAlteradoEvent(mensalidade)
+        );
+
         log.info("Mensalidade {} salva e paga", mensalidade.getId());
         
         gerarProximaMensalidade(mensalidade);
@@ -211,7 +220,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em cancelar mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
@@ -223,15 +232,22 @@ public class MensalidadeService {
         mensalidade.setDataCancelamento(LocalDate.now());     
 
         mensalidadeRepository.save(mensalidade);
+
         log.info("Mensalidade {} cancelada", mensalidade.getId());
 
         if (usuario.getRole() == RoleUser.ROLE_USER) {
             AcessoAcademia acessoAcademia = academiaRepository.findByUsuario(usuario)
             .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
 
+            usuario.setAcessosAcademia(null);
+
             academiaRepository.delete(acessoAcademia);
             log.info("Acesso {} deletado", acessoAcademia.getId());
         }
+        
+        applicationEventPublisher.publishEvent(
+            new MensalidadeStatusAlteradoEvent(mensalidade)
+        );
         
         return MensalidadeMapper.toDTO(mensalidade);
     }
@@ -274,7 +290,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em excluir mensalidade", usuario.getEmail());
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&

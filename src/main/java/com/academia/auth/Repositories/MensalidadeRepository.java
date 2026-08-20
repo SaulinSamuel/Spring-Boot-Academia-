@@ -19,7 +19,7 @@ import com.academia.auth.Models.enums.StatusMensalidade;
 public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long>,
 JpaSpecificationExecutor<Mensalidade> {
     
-    Optional<Mensalidade> findTopByUsuarioOrderByDataCriacaoDesc(Usuario usuario);
+    Optional<Mensalidade> findTopByUsuarioOrderByIdDesc(Usuario usuario);
 
     Long countByStatus(StatusMensalidade status);
 

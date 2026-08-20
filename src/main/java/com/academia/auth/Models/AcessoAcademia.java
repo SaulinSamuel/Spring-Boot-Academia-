@@ -40,8 +40,9 @@ public class AcessoAcademia {
     @Column(nullable = false)
     private String nome;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @OneToOne(
+        fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
 }

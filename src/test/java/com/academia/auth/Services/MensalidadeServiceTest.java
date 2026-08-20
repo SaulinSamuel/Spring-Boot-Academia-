@@ -23,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -54,6 +55,9 @@ public class MensalidadeServiceTest {
 
     @Mock
     private AcessoAcademiaRepository academiaRepository;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private Usuario usuario;
 
@@ -88,20 +92,6 @@ public class MensalidadeServiceTest {
         m.setAtualizacoes(0);
 
         return m;
-    }
-
-    private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
-
-        LocalDate hoje = LocalDate.now();
-
-        AcessoAcademia acessoAcademia = new AcessoAcademia();
-        acessoAcademia.setDiasAcesso(0);
-        acessoAcademia.setId(2L);
-        acessoAcademia.setInicioSemana(hoje);
-        acessoAcademia.setNome(usuario.getNome());
-        acessoAcademia.setUltimoAcesso(hoje);
-
-        return acessoAcademia;
     }
 
     @Nested
@@ -195,7 +185,7 @@ public class MensalidadeServiceTest {
 
             Mensalidade mensalidade = criarMensalidadePendente(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(mensalidadeRepository.save(any(Mensalidade.class)))
@@ -220,7 +210,7 @@ public class MensalidadeServiceTest {
 
             MensalidadeRequestDTO dto = new MensalidadeRequestDTO(3);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.empty());
 
             ResourceNotFound ex = assertThrows(
@@ -248,7 +238,7 @@ public class MensalidadeServiceTest {
             mensalidade.setDataPagamento(hoje);
             mensalidade.setStatus(StatusMensalidade.PAGA);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -273,7 +263,7 @@ public class MensalidadeServiceTest {
   
             mensalidade.setAtualizacoes(1);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -321,29 +311,6 @@ public class MensalidadeServiceTest {
             
         }
 
-        @Test
-        void deveLancarExcecaoDeMensalidadesNaoEncontradas() {
-
-            when(usuarioLogado.usuarioLogado())
-            .thenReturn(usuario);
-
-            Pageable pageable = PageRequest.of(0, 10);
-
-            List<Mensalidade> mensalidades = List.of();
-
-            Page<Mensalidade> page = new PageImpl<>(mensalidades);
-
-            when(mensalidadeRepository.findAllByUsuario(usuario, pageable))
-                .thenReturn(page);
-
-            ResourceNotFound ex = assertThrows(
-                ResourceNotFound.class,
-                () -> mensalidadeService.buscarSuasMensalidades(pageable)
-            );
-
-            assertEquals("Mensalidades não encontradas!", ex.getMessage());
-        }
-        
     }
 
     @Nested
@@ -495,7 +462,7 @@ public class MensalidadeServiceTest {
             Mensalidade mensalidade = criarMensalidadePendente(usuario);
             mensalidade.setId(1L);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             MensalidadeResponseDTO resultado = mensalidadeService.pagarMensalidade();
@@ -527,7 +494,7 @@ public class MensalidadeServiceTest {
 
             mensalidade.setStatus(StatusMensalidade.CANCELADA);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -623,7 +590,7 @@ public class MensalidadeServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             when(academiaRepository.findByUsuario(usuario))
@@ -652,7 +619,7 @@ public class MensalidadeServiceTest {
             mensalidade.setStatus(StatusMensalidade.PAGA);
             mensalidade.setId(1L);
 
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
 
             BusinessException exception = assertThrows(
@@ -681,18 +648,12 @@ public class MensalidadeServiceTest {
             mensalidade.setId(1L);
             mensalidade.setStatus(StatusMensalidade.PAGA);
 
-            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
-
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
-
-            when(academiaRepository.findByUsuario(usuario))
-                .thenReturn(Optional.of(acessoAcademia));
 
             mensalidadeService.excluirMensalidade();
 
             verify(mensalidadeRepository).delete(mensalidade);
-            verify(academiaRepository).delete(acessoAcademia);
         }
 
         @Test
@@ -704,13 +665,8 @@ public class MensalidadeServiceTest {
             Mensalidade mensalidade = criarMensalidadePendente(usuario);
             mensalidade.setId(1L);
 
-            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
-
-            when(mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario))
+            when(mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario))
                 .thenReturn(Optional.of(mensalidade));
-
-            when(academiaRepository.findByUsuario(usuario))
-                .thenReturn(Optional.of(acessoAcademia));
 
             BusinessException exception = assertThrows(
                 BusinessException.class,
@@ -720,7 +676,6 @@ public class MensalidadeServiceTest {
             assertEquals("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!", exception.getMessage());
 
             verify(mensalidadeRepository, never()).delete(mensalidade);
-            verify(academiaRepository, never()).delete(acessoAcademia);
         }
 
     }

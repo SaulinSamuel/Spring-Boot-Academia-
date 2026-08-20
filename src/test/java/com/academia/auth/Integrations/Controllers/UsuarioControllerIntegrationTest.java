@@ -310,7 +310,7 @@ public class UsuarioControllerIntegrationTest {
             usuario.setRole(RoleUser.ROLE_ADMIN);
 
             mockMvc.perform(
-                patch("/usuario/2/promover-funcionario")
+                patch("/usuario/" + usuarioPromovido.getId() + "/promover-funcionario")
                 .with(user(usuario))
             )
             .andExpect(status().isOk())
@@ -325,7 +325,7 @@ public class UsuarioControllerIntegrationTest {
         void deveImpedirUsuarioNaoAdminPromovaUsuario() throws Exception {
 
             mockMvc.perform(
-                patch("/usuario/2/promover-funcionario")
+                patch("/usuario/" + usuarioPromovido.getId() + "/promover-funcionario")
                 .with(user(usuario))
             )
             .andExpect(status().isBadRequest());
@@ -338,7 +338,7 @@ public class UsuarioControllerIntegrationTest {
             usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
             
             mockMvc.perform(
-                patch("/usuario/2/promover-funcionario")
+                patch("/usuario/" + usuarioPromovido.getId() + "/promover-funcionario")
                 .with(user(usuario))
             )
             .andExpect(status().isBadRequest());
@@ -373,7 +373,7 @@ public class UsuarioControllerIntegrationTest {
             usuario.setRole(RoleUser.ROLE_ADMIN);
 
             mockMvc.perform(
-                patch("/usuario/2/rebaixar-usuario")
+                patch("/usuario/" + usuarioRebaixado.getId() + "/rebaixar-usuario")
                 .with(user(usuario))
             )
             .andExpect(status().isOk())
@@ -384,7 +384,7 @@ public class UsuarioControllerIntegrationTest {
         void deveImpedirUsuarioNaoAdminOuSemPermissaoDeRebaixarFuncionario() throws Exception {
 
             mockMvc.perform(
-                patch("/usuario/2/rebaixar-usuario")
+                patch("/usuario/" + usuarioRebaixado.getId() + "/rebaixar-usuario")
                 .with(user(usuario))
             )
             .andExpect(status().isBadRequest());
@@ -397,7 +397,7 @@ public class UsuarioControllerIntegrationTest {
             usuarioRebaixado.setRole(RoleUser.ROLE_USER);
 
             mockMvc.perform(
-                patch("/usuario/2/rebaixar-usuario")
+                patch("/usuario/" + usuarioRebaixado.getId() + "/rebaixar-usuario")
                 .with(user(usuario))
             )
             .andExpect(status().isBadRequest());

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.academia.auth.Models.enums.RoleUser;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -69,7 +70,9 @@ public class Usuario implements UserDetails {
 
     @OneToOne(
         fetch = FetchType.LAZY,
-        mappedBy = "usuario"
+        mappedBy = "usuario",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
     )
     private AcessoAcademia acessosAcademia;
 

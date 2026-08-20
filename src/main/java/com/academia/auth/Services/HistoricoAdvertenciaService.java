@@ -62,11 +62,11 @@ public class HistoricoAdvertenciaService {
 
         Specification<HistoricoAdvertencia> spec = (root, query, cb) -> null;
         
-        spec.and(HistoricoAdvertenciaSpecification.dataExclusão(inicio, fim));
-        spec.and(HistoricoAdvertenciaSpecification.destinatario(destinatario));
-        spec.and(HistoricoAdvertenciaSpecification.excluidoPor(excluidoPor));
-        spec.and(HistoricoAdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
-        spec.and(HistoricoAdvertenciaSpecification.remetente(remetente));
+        spec = spec.and(HistoricoAdvertenciaSpecification.dataExclusão(inicio, fim));
+        spec = spec.and(HistoricoAdvertenciaSpecification.destinatario(destinatario));
+        spec = spec.and(HistoricoAdvertenciaSpecification.excluidoPor(excluidoPor));
+        spec = spec.and(HistoricoAdvertenciaSpecification.nivelAdvertencia(nivelAdvertencia));
+        spec = spec.and(HistoricoAdvertenciaSpecification.remetente(remetente));
 
         Page<HistoricoAdvertencia> historicoAdvertencias = historicoAdvertenciaRepository.findAll(
             spec, pageable

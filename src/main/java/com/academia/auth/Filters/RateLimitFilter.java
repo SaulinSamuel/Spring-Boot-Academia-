@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import io.github.bucket4j.Bandwidth;
@@ -18,6 +19,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Profile("!test")
 public class RateLimitFilter implements Filter {
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();

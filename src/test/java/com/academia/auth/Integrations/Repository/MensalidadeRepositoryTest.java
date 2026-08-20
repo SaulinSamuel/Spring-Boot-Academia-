@@ -86,7 +86,7 @@ public class MensalidadeRepositoryTest {
 
         mensalidadeRepository.saveAll(mensalidades);
 
-        Optional<Mensalidade> resultado = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario);
+        Optional<Mensalidade> resultado = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario);
 
         assertThat(resultado).isPresent();
 
@@ -101,7 +101,7 @@ public class MensalidadeRepositoryTest {
 
         usuarioRepository.save(usuario);
 
-        Optional<Mensalidade> resultado = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario);
+        Optional<Mensalidade> resultado = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario);
 
         assertThat(resultado).isEmpty();
     }

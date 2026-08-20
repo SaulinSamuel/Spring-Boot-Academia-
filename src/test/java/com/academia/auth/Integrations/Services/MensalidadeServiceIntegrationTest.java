@@ -134,7 +134,7 @@ public class MensalidadeServiceIntegrationTest {
 
             assertThat(resultado).isNotNull();
 
-            Mensalidade mensalidade = mensalidadeRepository.findById(usuario.getId())
+            Mensalidade mensalidade = mensalidadeRepository.findById(resultado.getId())
                 .orElseThrow();
 
             AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
@@ -170,7 +170,7 @@ public class MensalidadeServiceIntegrationTest {
 
             assertThat(resultado).isNotNull();
 
-            Mensalidade mensalidadeSalva = mensalidadeRepository.findById(usuario.getId())
+            Mensalidade mensalidadeSalva = mensalidadeRepository.findById(resultado.getId())
                 .orElseThrow();
 
             AcessoAcademia acessoAcademiaUsuario = acessoAcademiaRepository.findByUsuario(usuario)
@@ -264,7 +264,7 @@ public class MensalidadeServiceIntegrationTest {
 
             assertThat(resultado.getAluno()).isEqualTo(usuario.getNome());
 
-            Mensalidade mensalidadeAtualizada = mensalidadeRepository.findById(usuario.getId())
+            Mensalidade mensalidadeAtualizada = mensalidadeRepository.findById(resultado.getId())
                 .orElseThrow();
 
             assertThat(mensalidadeAtualizada.getDiasTreino()).isEqualTo(dto.getDiasTreino());
@@ -722,7 +722,7 @@ public class MensalidadeServiceIntegrationTest {
 
             mensalidadeService.excluirMensalidade();
 
-            Optional<Mensalidade> mensalidadeExcluida = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario);
+            Optional<Mensalidade> mensalidadeExcluida = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario);
 
             assertThat(mensalidadeExcluida).isEmpty();
         }

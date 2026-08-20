@@ -496,7 +496,7 @@ public class MensalidadeControllerIntegrationTest {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PAGA"));
-        }
+        }   
 
         @Test
         void deveImpedirPagarMensalidadesNaoPagas() throws Exception {

@@ -67,7 +67,7 @@ public class AcessoAcademiaService {
 
         validarAdvertenciasAluno(usuario);
 
-        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByDataCriacaoDesc(usuario)
+        Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {

@@ -46,15 +46,9 @@ public class HistoricoAdvertencia {
     private String destinatario;
 
     @Column(nullable = false)
-    private String excluidoPor;
-
-    @Column(nullable = false)
     private LocalDateTime dataCriacao;
 
     @Column(nullable = false)
     private LocalDateTime dataExpiracao;
-
-    @Column(nullable = false)
-    private LocalDateTime dataExclusao;
 
 }

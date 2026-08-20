@@ -2,6 +2,7 @@ package com.academia.auth.Services;
 
 import java.time.LocalDateTime;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,17 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.academia.auth.DTOS.Advertencia.AdvertenciaRequestDTO;
 import com.academia.auth.DTOS.Advertencia.AdvertenciaResponseDTO;
+import com.academia.auth.Events.AdvertenciaCriadaEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.AdvertenciaMapper;
-import com.academia.auth.Mappers.HistoricoAdvertenciaMapper;
 import com.academia.auth.Models.Advertencia;
-import com.academia.auth.Models.HistoricoAdvertencia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.AdvertenciaStatus;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AdvertenciaRepository;
-import com.academia.auth.Repositories.HistoricoAdvertenciaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 import com.academia.auth.Specifications.AdvertenciaSpecification;
@@ -36,7 +35,7 @@ public class AdvertenciaService {
     private final AdvertenciaRepository advertenciaRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioAutenticadoService usuarioLogado;
-    private final HistoricoAdvertenciaRepository historicoAdvertenciaRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public AdvertenciaResponseDTO enviarAdvertencia(AdvertenciaRequestDTO dto, Long id) {
@@ -68,6 +67,10 @@ public class AdvertenciaService {
         definirDataExpiracao(advertencia);
         
         advertenciaRepository.save(advertencia);
+
+        applicationEventPublisher.publishEvent(
+            new AdvertenciaCriadaEvent(advertencia)  
+        );
 
         return AdvertenciaMapper.toDTO(advertencia);
     }
@@ -153,13 +156,6 @@ public class AdvertenciaService {
         {
             throw new BusinessException("Você não tem permissão para excluir essa advertência!");
         }
-
-        HistoricoAdvertencia historicoAdvertencia = HistoricoAdvertenciaMapper.toEntityFromAdvertencia(
-            advertencia, 
-            usuario
-        );
-
-        historicoAdvertenciaRepository.save(historicoAdvertencia);
 
         advertenciaRepository.delete(advertencia);
     }

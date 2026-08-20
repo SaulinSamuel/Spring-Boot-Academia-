@@ -21,11 +21,7 @@ public class HistoricoAdvertenciaResponseDTO {
 
     private String destinatário;
 
-    private String excluidoPor;
-
     private LocalDateTime dataCriacao;
 
     private LocalDateTime dataExpiracao;
-
-    private LocalDateTime dataExclusão;
 }

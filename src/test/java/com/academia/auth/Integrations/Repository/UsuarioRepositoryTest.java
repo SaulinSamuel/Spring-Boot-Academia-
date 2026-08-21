@@ -11,12 +11,15 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.config.TestContainersConfig;
 
 @DataJpaTest
+@Import(TestContainersConfig.class)
 class UsuarioRepositoryTest {
 
     @Autowired
@@ -43,8 +46,11 @@ class UsuarioRepositoryTest {
 
         Optional<Usuario> resultado = usuarioRepository.findByEmail(usuario.getEmail());
 
-        assertEquals(usuario.getId(), resultado.get().getId());
-        assertEquals(usuario.getEmail(), resultado.get().getEmail());
+        assertThat(resultado)
+            .isPresent()
+            .get()
+            .extracting(Usuario::getId)
+            .isEqualTo(usuario.getId());
     }
 
     @Test

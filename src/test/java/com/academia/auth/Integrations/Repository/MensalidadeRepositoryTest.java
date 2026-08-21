@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,12 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.config.TestContainersConfig;
 
 import jakarta.persistence.EntityManager;
 
 @DataJpaTest
+@Import(TestContainersConfig.class)
 public class MensalidadeRepositoryTest {
 
     @Autowired

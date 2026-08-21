@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,9 +39,11 @@ import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Security.JwtService;
+import com.academia.auth.config.TestContainersConfig;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestContainersConfig.class)
 @ActiveProfiles("test")
 @Transactional
 public class MensalidadeControllerIntegrationTest {

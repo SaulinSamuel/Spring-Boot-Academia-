@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +18,10 @@ import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AvaliacaoFisicaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
+import com.academia.auth.config.TestContainersConfig;
 
 @DataJpaTest
+@Import(TestContainersConfig.class)
 public class AvaliacaoFisicaRepositoryTest {
 
     @Autowired

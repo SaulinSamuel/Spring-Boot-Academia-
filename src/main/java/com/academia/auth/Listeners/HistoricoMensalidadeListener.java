@@ -1,4 +1,4 @@
-package com.academia.auth.Listeners.HistoricoMensalidade;
+package com.academia.auth.Listeners;
 
 import com.academia.auth.Repositories.HistoricoMensalidadeRepository;
 

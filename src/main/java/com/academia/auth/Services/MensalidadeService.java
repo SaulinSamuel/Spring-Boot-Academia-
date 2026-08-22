@@ -82,8 +82,8 @@ public class MensalidadeService {
         }
 
         mensalidade.setValor(valor);
-        mensalidade.setDataCriacao(LocalDate.now());
-        mensalidade.setDataVencimento(LocalDate.now().plusMonths(1));
+        mensalidade.setDataCriacao(hoje);
+        mensalidade.setDataVencimento(hoje.plusMonths(1));
         mensalidade.setUsuario(usuario);
         mensalidade.setDiasTreino(dto.getDiasTreino());
         mensalidade.setDataPagamento(null);

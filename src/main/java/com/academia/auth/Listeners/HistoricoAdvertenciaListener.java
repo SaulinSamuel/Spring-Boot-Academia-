@@ -1,4 +1,4 @@
-package com.academia.auth.Listeners.HistoricoAdvertencia;
+package com.academia.auth.Listeners;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;

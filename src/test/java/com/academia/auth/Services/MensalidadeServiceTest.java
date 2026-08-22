@@ -1,5 +1,6 @@
 package com.academia.auth.Services;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -676,6 +677,20 @@ public class MensalidadeServiceTest {
             assertEquals("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!", exception.getMessage());
 
             verify(mensalidadeRepository, never()).delete(mensalidade);
+        }
+
+        @Test
+        void deveRetornarMensalidadeNaoEncontradaCasoNaoExista() {
+
+            when(usuarioLogado.usuarioLogado())
+                .thenReturn(usuario);
+
+            ResourceNotFound except = assertThrows(
+                ResourceNotFound.class,
+                () -> mensalidadeService.excluirMensalidade()
+            );
+
+            assertThat(except.getMessage()).isEqualTo("Mensalidade não encontrada!");
         }
 
     }

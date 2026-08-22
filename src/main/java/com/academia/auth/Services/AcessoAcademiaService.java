@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,14 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.academia.auth.DTOS.AcessoAcademia.AcessoAcademiaRequestDTO;
 import com.academia.auth.DTOS.AcessoAcademia.AcessoAcademiaResponseDTO;
+import com.academia.auth.Events.AcessarAcademiaEvent;
 import com.academia.auth.Exceptions.AcessoAcademiaException;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.AcessoAcademiaMapper;
-import com.academia.auth.Mappers.HistoricoAcessosMapper;
 import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Advertencia;
-import com.academia.auth.Models.HistoricoAcessos;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.AdvertenciaStatus;
@@ -27,7 +27,6 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.AdvertenciaRepository;
-import com.academia.auth.Repositories.HistoricoAcessosRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
@@ -46,7 +45,7 @@ public class AcessoAcademiaService {
     private final PasswordEncoder passwordEncoder;
     private final MensalidadeRepository mensalidadeRepository;
     private final UsuarioAutenticadoService usuarioLogado;
-    private final HistoricoAcessosRepository historicoAcessosRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public AcessoAcademiaResponseDTO acessarAcademia(AcessoAcademiaRequestDTO dto) {
@@ -75,19 +74,22 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Mensalidade em atraso ou cancelada!");
         }
 
-        AcessoAcademia acessoAcademia = usuario.getAcessosAcademia();
+        AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
+            .orElseThrow(() -> new ResourceNotFound("Acesso academia não encontrado!"));
 
-        LocalDate hoje = validarAcessoAcademiaAluno(acessoAcademia, mensalidade, usuario);
+        validarAcessoAcademiaAluno(acessoAcademia, mensalidade, usuario);
+
+        LocalDate hoje = LocalDate.now();
 
         acessoAcademia.setUltimoAcesso(hoje);
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
 
-        HistoricoAcessos historicoAcessos = HistoricoAcessosMapper.toHistoricoAcessosFromAcesso(acessoAcademia);
-
-        historicoAcessosRepository.save(historicoAcessos);
-
         acessoAcademiaRepository.save(acessoAcademia);
         log.info("Usuário {} acessou a academia as {}", usuario.getEmail(), hoje);
+
+        applicationEventPublisher.publishEvent(
+            new AcessarAcademiaEvent(acessoAcademia)
+        );
 
         return AcessoAcademiaMapper.toDTO(acessoAcademia);
     }
@@ -116,17 +118,19 @@ public class AcessoAcademiaService {
         AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
             .orElseThrow(() -> new ResourceNotFound("Acesso não encontrado!"));
 
-        LocalDate hoje = validarAcessoAcademiaFuncionario(acessoAcademia, usuario);
+        validarAcessoAcademiaFuncionario(acessoAcademia, usuario);
+
+        LocalDate hoje = LocalDate.now();
 
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
         acessoAcademia.setUltimoAcesso(hoje);
 
-        HistoricoAcessos historicoAcessos = HistoricoAcessosMapper.toHistoricoAcessosFromAcesso(acessoAcademia);
-
-        historicoAcessosRepository.save(historicoAcessos);
-
         acessoAcademiaRepository.save(acessoAcademia);
         log.info("Funcionário {} acessou a academia!", usuario.getEmail());
+
+        applicationEventPublisher.publishEvent(
+            new AcessarAcademiaEvent(acessoAcademia)
+        );
 
         return AcessoAcademiaMapper.toDTO(acessoAcademia);
     }
@@ -187,9 +191,9 @@ public class AcessoAcademiaService {
         if (!inicioSemana.equals(acessoAcademia.getInicioSemana())) {
             acessoAcademia.setInicioSemana(inicioSemana);
             acessoAcademia.setDiasAcesso(0);
-        }   
+        }
 
-        if (LocalDate.now().equals(acessoAcademia.getUltimoAcesso())) {
+        if (hoje.equals(acessoAcademia.getUltimoAcesso())) {
             log.warn("Usuário {} tentou acessar mais de uma vez no dia", usuario.getEmail());
             throw new AcessoAcademiaException("Você já acessou a academia hoje!");
         }
@@ -206,7 +210,7 @@ public class AcessoAcademiaService {
         return hoje;
     }
 
-    public LocalDate validarAcessoAcademiaFuncionario(AcessoAcademia acessoAcademia, Usuario usuario) {
+    public void validarAcessoAcademiaFuncionario(AcessoAcademia acessoAcademia, Usuario usuario) {
 
         LocalDate hoje = LocalDate.now();
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
@@ -231,8 +235,6 @@ public class AcessoAcademiaService {
             log.warn("Usuário {} tentou acessar com acesso inválido id: {}", usuario.getEmail(), acessoAcademia.getId());
             throw new AcessoAcademiaException("Esse acesso de academia não pertence a você!");
         }
-
-        return hoje;
     }
 
     public void validarAdvertenciasAluno(Usuario usuario) {

@@ -109,12 +109,6 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Apenas funcionários podem utlizar esse acesso!");
         }
 
-        Long quantidadeAdvertencias = advertenciaRepository.countByDestinatario(usuario);
-
-        if (quantidadeAdvertencias >= 3) {
-            throw new AcessoAcademiaException("Você não tem permissão para entrar na academia! (Máximo de advertências 3!)");
-        }
-
         AcessoAcademia acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario)
             .orElseThrow(() -> new ResourceNotFound("Acesso não encontrado!"));
 
@@ -177,7 +171,11 @@ public class AcessoAcademiaService {
             .map(AcessoAcademiaMapper::toDTO);
     }
 
-    public LocalDate validarAcessoAcademiaAluno(AcessoAcademia acessoAcademia, Mensalidade mensalidade, Usuario usuario) {
+    public LocalDate validarAcessoAcademiaAluno(
+        AcessoAcademia acessoAcademia, 
+        Mensalidade mensalidade, 
+        Usuario usuario) 
+    {
         
         LocalDate hoje = LocalDate.now();
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);

@@ -7,6 +7,8 @@ import com.academia.auth.Models.enums.StatusMensalidade;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,6 +50,7 @@ public class HistoricoMensalidade {
     private LocalDate dataCancelamento;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private StatusMensalidade status;
 
 }

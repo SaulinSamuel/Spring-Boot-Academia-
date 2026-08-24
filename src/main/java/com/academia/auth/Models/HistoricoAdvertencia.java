@@ -25,7 +25,7 @@ import lombok.Setter;
 @Builder
 
 @Entity
-@Table(name = "historicoAdvertencias")
+@Table(name = "historico_advertencias")
 public class HistoricoAdvertencia {
     
     @Id

@@ -171,7 +171,7 @@ public class AcessoAcademiaService {
             .map(AcessoAcademiaMapper::toDTO);
     }
 
-    public LocalDate validarAcessoAcademiaAluno(
+    public void validarAcessoAcademiaAluno(
         AcessoAcademia acessoAcademia, 
         Mensalidade mensalidade, 
         Usuario usuario) 
@@ -205,7 +205,6 @@ public class AcessoAcademiaService {
             throw new AcessoAcademiaException("Esse acesso não pertence a você!");
         }
 
-        return hoje;
     }
 
     public void validarAcessoAcademiaFuncionario(AcessoAcademia acessoAcademia, Usuario usuario) {
@@ -256,6 +255,8 @@ public class AcessoAcademiaService {
         } else if (total >= 3) {
             throw new AcessoAcademiaException("Você não pode acessar a academia com 3 advertências ou mais!");
         }
+
+        log.info("Advertencias de aluno validadas acesso liberado!");
     }
 
 }

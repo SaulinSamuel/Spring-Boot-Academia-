@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +31,22 @@ import com.academia.auth.Exceptions.AcessoAcademiaException;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Models.AcessoAcademia;
+import com.academia.auth.Models.Advertencia;
 import com.academia.auth.Models.Mensalidade;
 import com.academia.auth.Models.Usuario;
+import com.academia.auth.Models.enums.AdvertenciaStatus;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusMensalidade;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
+import com.academia.auth.Repositories.AdvertenciaRepository;
 import com.academia.auth.Repositories.MensalidadeRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.AcessoAcademiaService;
 import com.academia.auth.config.TestContainersConfig;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(TestContainersConfig.class)
@@ -50,6 +58,9 @@ public class AcessoAcademiaServiceIntegrationTest {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AdvertenciaRepository advertenciaRepository;
 
     @Autowired
     private AcessoAcademiaService acessoAcademiaService;
@@ -104,6 +115,22 @@ public class AcessoAcademiaServiceIntegrationTest {
 
         return m;
     }
+
+    private Advertencia criarAdvertencia(Usuario remetente, Usuario destinatario) {
+
+        LocalDateTime hoje = LocalDateTime.now();
+
+        Advertencia advertencia = new Advertencia();
+
+        advertencia.setRemetente(remetente);
+        advertencia.setDestinatario(destinatario);
+        advertencia.setMensagem("Quebrou!");
+        advertencia.setNivelAdvertencia(AdvertenciaStatus.LEVE);
+        advertencia.setDataCriacao(hoje);
+        advertencia.setDataExpiracao(hoje.plusDays(3));
+
+        return advertencia;
+    }   
 
     @Nested
     class acessarAcademiaTest {
@@ -494,21 +521,27 @@ public class AcessoAcademiaServiceIntegrationTest {
     }
 
     @Nested
-    class validarAcessoAcademiaAlunoTest {
+    class validarAdvertenciasAlunoTest {
 
-        private Usuario usuario;
+        private Usuario remetente;
+        private Usuario destinatario;
 
         @BeforeEach
         void configurarUsuarioAutenticado() {
 
-            usuario = criarUsuario();
+            remetente = criarUsuario();
 
-            usuarioRepository.save(usuario);
+            destinatario = criarUsuario();
+            destinatario.setEmail("teste1@gmil.com");
+
+            List<Usuario> usuarios = List.of(remetente, destinatario);
+
+            usuarioRepository.saveAll(usuarios);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                usuario,
+                remetente,
                 null,
-                usuario.getAuthorities()
+                remetente.getAuthorities()
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -517,15 +550,72 @@ public class AcessoAcademiaServiceIntegrationTest {
         @AfterEach
         void limparSecurityContext() {
             SecurityContextHolder.clearContext();
-        }  
+        }
 
         @Test
-        void deveValidarAcessoAcademiaAluno() {
+        void deveLiberarAlunoSemAdvertencias() {
 
-            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuario);
-            Mensalidade mensalidade = criarMensalidade(usuario);
+            acessoAcademiaService.validarAdvertenciasAluno(destinatario);
+        }
 
-            
+        @Test
+        void deveImpedirAcessoComUmaAdvertenciaGrave() {
+
+            Advertencia advertencia = criarAdvertencia(remetente, destinatario);
+            advertencia.setNivelAdvertencia(AdvertenciaStatus.GRAVE);
+            advertenciaRepository.save(advertencia);
+
+            AcessoAcademiaException exception = assertThrows(
+                AcessoAcademiaException.class,
+                () -> acessoAcademiaService.validarAdvertenciasAluno(destinatario)
+            );
+
+            assertThat(exception.getMessage()).isEqualTo("Você não pode acessar a academia com 1 advertência grave ou mais!");
+        }
+
+        @Test
+        void deveImpedirAcessoComDuasOuMaisAdvertenciasModeradas() {
+
+            Advertencia advertencia = criarAdvertencia(remetente, destinatario);
+            advertencia.setNivelAdvertencia(AdvertenciaStatus.MODERADA);
+
+            Advertencia advertencia2 = criarAdvertencia(remetente, destinatario);
+            advertencia2.setNivelAdvertencia(AdvertenciaStatus.MODERADA);
+
+            List<Advertencia> advertencias = List.of(advertencia, advertencia2);
+
+            advertenciaRepository.saveAll(advertencias);
+
+            AcessoAcademiaException exception = assertThrows(
+                AcessoAcademiaException.class,
+                () -> acessoAcademiaService.validarAdvertenciasAluno(destinatario)
+            );
+
+            assertThat(exception.getMessage()).isEqualTo("Você não pode acessar a academia com 2 advertências moderadas ou mais!");
+        }
+
+        @Test
+        void deveImpedirAcessoComMaisdeTresAdvertencias() {
+
+            Advertencia advertencia = criarAdvertencia(remetente, destinatario);
+            advertencia.setNivelAdvertencia(AdvertenciaStatus.LEVE);
+
+            Advertencia advertencia2 = criarAdvertencia(remetente, destinatario);
+            advertencia2.setNivelAdvertencia(AdvertenciaStatus.LEVE);
+
+            Advertencia advertencia3 = criarAdvertencia(remetente, destinatario);
+            advertencia.setNivelAdvertencia(AdvertenciaStatus.LEVE);
+
+            List<Advertencia> advertencias = List.of(advertencia, advertencia2, advertencia3);
+
+            advertenciaRepository.saveAll(advertencias);
+
+            AcessoAcademiaException exception = assertThrows(
+                AcessoAcademiaException.class,
+                () -> acessoAcademiaService.validarAdvertenciasAluno(destinatario)
+            );
+
+            assertThat(exception.getMessage()).isEqualTo("Você não pode acessar a academia com 3 advertências ou mais!");
         }
 
     }

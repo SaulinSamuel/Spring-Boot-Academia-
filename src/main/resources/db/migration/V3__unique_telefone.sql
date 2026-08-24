@@ -1,0 +1,2 @@
+ALTER TABLE usuarios
+MODIFY COLUMN telefone VARCHAR(20) UNIQUE;

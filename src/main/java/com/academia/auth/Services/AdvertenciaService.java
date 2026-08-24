@@ -42,14 +42,12 @@ public class AdvertenciaService {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
-        if (usuario.getRole() == RoleUser.ROLE_USER) {
-            throw new BusinessException("Você não tem permissão de enviar advertências");
-        }
-
         Usuario usuarioDestinatario = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
         
-        if (usuarioDestinatario.getRole() != RoleUser.ROLE_USER) {
+        if (usuario.getRole() == RoleUser.ROLE_USER || 
+            usuarioDestinatario.getRole() != RoleUser.ROLE_USER) 
+        {
             throw new BusinessException("Você não pode enviar advertências para funcionários!");
         }
 

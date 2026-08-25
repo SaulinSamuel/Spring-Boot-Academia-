@@ -44,6 +44,11 @@ public class UsuarioService {
             throw new BusinessException("Email já cadastrado!");
         }
 
+        if (usuarioRepository.existsByTelefone(dto.getTelefone())) {
+            log.warn("Tentativa de cadastro telefone existente!");
+            throw new BusinessException("Telefone já cadastrado!");
+        }
+
         Usuario usuario = UsuarioMapper.toEntity(dto);
 
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -70,8 +75,14 @@ public class UsuarioService {
             throw new BusinessException("Usuário já existente com esse email!");
         }
 
+        if (usuarioRepository.existsByTelefoneAndIdNot(dto.getTelefone(), usuario.getId())) {
+            log.warn("Usuário {} tentou modificar telefone já existente!");
+            throw new BusinessException("Usuário já existente com esse telefone!");
+        }
+
         usuario.setEmail(dto.getEmail());
         usuario.setNome(dto.getNome());
+        usuario.setTelefone(dto.getTelefone());
 
         if(dto.getSenhaNova() != null) {
             log.info("Senha do usuário {} atualizada!", usuario.getEmail());

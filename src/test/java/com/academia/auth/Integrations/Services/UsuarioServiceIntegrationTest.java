@@ -172,6 +172,7 @@ class UsuarioServiceIntegrationTest {
             UsuarioAtualizarDTO dto = new UsuarioAtualizarDTO(
                 "Saulin",
                 "saulin@gmail.com",
+                "98 94833 9743",
                "091812",
                null 
             );
@@ -199,6 +200,7 @@ class UsuarioServiceIntegrationTest {
             UsuarioAtualizarDTO dto = new UsuarioAtualizarDTO(
                 "Saulin",
                 "saulin@gmail.com",
+                "98 89433 8435",
                 "091812",
                 "123456"
             );
@@ -232,6 +234,7 @@ class UsuarioServiceIntegrationTest {
             UsuarioAtualizarDTO dto = new UsuarioAtualizarDTO(
                 "Saulin",
                 "saulin@gmail.com",
+                "97 84783 9843",
                 "091813",
                 "123456"
             );
@@ -255,6 +258,7 @@ class UsuarioServiceIntegrationTest {
             UsuarioAtualizarDTO dto = new UsuarioAtualizarDTO(
                 "Saulin",
                 "existe@gmail.com",
+                "98 73932 9847",
                 "091812",
                 null
             );

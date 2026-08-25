@@ -19,5 +19,7 @@ public class UsuarioResponseDTO {
 
     private String email;
 
+    private String telefone;
+
     private RoleUser role;
 }

@@ -77,10 +77,14 @@ public class UsuarioServiceTest {
             UsuarioRequestDTO dto = new UsuarioRequestDTO(
                 "Saulo",
                 "saulo@email.com",
+                "98 98382 2833",
                 "1243345"
             );
 
             when(usuarioRepository.existsByEmail(dto.getEmail()))
+                .thenReturn(false);
+
+            when(usuarioRepository.existsByTelefone(dto.getTelefone()))
                 .thenReturn(false);
 
             when(passwordEncoder.encode(dto.getSenha()))
@@ -122,6 +126,7 @@ public class UsuarioServiceTest {
             UsuarioRequestDTO dto = new UsuarioRequestDTO(
                 "Saulin",
                 "saulo@gmail.com",
+                "98 83733 9784",
                 "091812"
             );
 
@@ -165,9 +170,15 @@ public class UsuarioServiceTest {
                 1L
             )).thenReturn(false);
 
+            when(usuarioRepository.existsByTelefoneAndIdNot(
+                "98 87483 7643",
+                1L
+            )).thenReturn(false);
+
             UsuarioAtualizarDTO dto = new UsuarioAtualizarDTO(
                 "Saulo novo",
                 "saulonovo@email.com",
+                "98 87483 7643",
                 "123456",
                 null
             );

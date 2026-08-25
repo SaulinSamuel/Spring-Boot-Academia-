@@ -43,6 +43,7 @@ public class DashboardService {
         Long quantidadeAlunos = usuarioRepository.countByRole(RoleUser.ROLE_USER);
         Long mensalidadesPendentes = mensalidadeRepository.countByStatus(StatusMensalidade.PENDENTE);
         Long mensalidadesPagas = mensalidadeRepository.countByStatus(StatusMensalidade.PAGA);
+        Long mensalidadesCanceladas = mensalidadeRepository.countByStatus(StatusMensalidade.CANCELADA);
 
         BigDecimal faturamento = Optional.ofNullable(
             mensalidadeRepository.somarValorPorPeriodo(StatusMensalidade.PAGA, 
@@ -54,14 +55,15 @@ public class DashboardService {
         Long quantidadeFuncionarios = usuarioRepository.countByRole(RoleUser.ROLE_FUNCIONARIO);
         Long acessosSemana = acessoAcademiaRepository.somarDiasAcessadosSemana();
 
-        DashboardResponseDTO dashboard = new DashboardResponseDTO();
-
-        dashboard.setAcessosSemana(acessosSemana);
-        dashboard.setFaturamentoTotal(faturamento);
-        dashboard.setMensalidadesPagas(mensalidadesPagas);
-        dashboard.setMensalidadesPendentes(mensalidadesPendentes);
-        dashboard.setQuantidadeFuncionarios(quantidadeFuncionarios);
-        dashboard.setQuantidadeAlunos(quantidadeAlunos);
+        DashboardResponseDTO dashboard = DashboardResponseDTO.builder()
+            .acessosSemana(acessosSemana)
+            .faturamentoTotal(faturamento)
+            .mensalidadesPagas(mensalidadesPagas)
+            .mensalidadesPendentes(mensalidadesPendentes)
+            .mensalidadesCanceladas(mensalidadesCanceladas)
+            .quantidadeAlunos(quantidadeAlunos)
+            .quantidadeFuncionarios(quantidadeFuncionarios)
+        .build();
 
         return dashboard;
     }

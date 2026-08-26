@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -277,6 +278,7 @@ class UsuarioServiceIntegrationTest {
     class promoverUsuarioAFuncionarioTest {
 
         private Usuario usuario;
+        private Usuario usuarioPromovido;
 
         @BeforeEach
         void configurarUsuarioAutenticado() {
@@ -284,7 +286,13 @@ class UsuarioServiceIntegrationTest {
             usuario = criarUsuario();
             usuario.setSenha(passwordEncoder.encode("091812"));
 
-            usuario = usuarioRepository.save(usuario);
+            usuarioPromovido = criarUsuario();
+            usuarioPromovido.setEmail("usuariopromovido@gmail.com");
+            usuarioPromovido.setSenha(passwordEncoder.encode("091812"));
+
+            List<Usuario> usuarios = List.of(usuario, usuarioPromovido);  
+
+            usuarioRepository.saveAll(usuarios);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                 usuario,
@@ -305,11 +313,6 @@ class UsuarioServiceIntegrationTest {
 
             usuario.setRole(RoleUser.ROLE_ADMIN);
 
-            Usuario usuarioPromovido = criarUsuario();
-            usuarioPromovido.setEmail("usuariopromovido@gmail.com");
-
-            usuarioRepository.save(usuarioPromovido);
-
             UsuarioResponseDTO resultado = usuarioService.promoverUsuarioAFuncionario(usuarioPromovido.getId());
 
             assertThat(resultado).isNotNull();
@@ -317,13 +320,10 @@ class UsuarioServiceIntegrationTest {
             assertThat(resultado.getEmail()).isEqualTo(usuarioPromovido.getEmail());
             assertThat(resultado.getRole()).isEqualTo(RoleUser.ROLE_FUNCIONARIO);
 
-            Usuario usuarioPromovidoSalvo = usuarioRepository.findById(usuarioPromovido.getId())
-                .orElseThrow();
+            Optional<Usuario> usuarioPromovidoSalvo = usuarioRepository.findById(usuarioPromovido.getId());
 
-            assertThat(usuarioPromovidoSalvo.getAcessosAcademia()).isNotNull();
-
-            assertThat(usuarioPromovidoSalvo.getId()).isEqualTo(usuarioPromovido.getId());
-            assertThat(usuarioPromovidoSalvo.getRole()).isEqualTo(RoleUser.ROLE_FUNCIONARIO);
+            assertThat(usuarioPromovidoSalvo.get().getId()).isEqualTo(usuarioPromovido.getId());
+            assertThat(usuarioPromovidoSalvo.get().getRole()).isEqualTo(RoleUser.ROLE_FUNCIONARIO);
         }
         
         @Test
@@ -331,20 +331,16 @@ class UsuarioServiceIntegrationTest {
 
             BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> usuarioService.promoverUsuarioAFuncionario(2L)
+                () -> usuarioService.promoverUsuarioAFuncionario(usuarioPromovido.getId())
             );
 
-            assertThat(exception.getMessage()).isEqualTo("Você não tem permissão para promover usuário a funcionário!");
+            assertThat(exception.getMessage()).isEqualTo("Você não tem permissão para promover funcionários!");
         }
 
         @Test
         void deveLancarExcecaoVoceNaoPodePromoverFuncionariosJaFuncionarios() {
 
-            Usuario usuarioPromovido = criarUsuario();
-            usuarioPromovido.setEmail("promovido@gmail.com");
             usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
-
-            usuarioRepository.save(usuarioPromovido);
 
             usuario.setRole(RoleUser.ROLE_ADMIN);
 

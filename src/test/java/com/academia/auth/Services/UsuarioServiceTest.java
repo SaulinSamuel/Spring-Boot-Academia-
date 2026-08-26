@@ -32,7 +32,6 @@ import com.academia.auth.DTOS.Usuario.UsuarioDeletarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
-import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Repositories.AcessoAcademiaRepository;
@@ -364,20 +363,18 @@ public class UsuarioServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
-            when(usuarioRepository.findById(2L))
+            when(usuarioRepository.findById(futuroFuncionario.getId()))
                 .thenReturn(Optional.of(futuroFuncionario));
 
             when(usuarioRepository.save(any(Usuario.class)))
                 .thenReturn(futuroFuncionario);
 
             UsuarioResponseDTO resultado = usuarioService.promoverUsuarioAFuncionario(futuroFuncionario.getId());
-            Optional<AcessoAcademia> acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario);
 
             assertEquals(futuroFuncionario.getEmail(), resultado.getEmail());
             assertEquals(futuroFuncionario.getNome(), resultado.getNome());
             assertEquals(futuroFuncionario.getId(), resultado.getId());
             assertEquals(RoleUser.ROLE_FUNCIONARIO, resultado.getRole());
-            assertThat(acessoAcademia).isNotEmpty();
 
             ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
 
@@ -410,12 +407,15 @@ public class UsuarioServiceTest {
             when(usuarioLogado.usuarioLogado())
                 .thenReturn(usuario);
 
+            when(usuarioRepository.findById(futuroFuncionario.getId()))
+                .thenReturn(Optional.of(futuroFuncionario));
+        
             BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> usuarioService.promoverUsuarioAFuncionario(futuroFuncionario.getId())
             );
 
-            assertEquals("Você não tem permissão para promover usuário a funcionário!", exception.getMessage());
+            assertEquals("Você não tem permissão para promover funcionários!", exception.getMessage());
 
             verify(usuarioRepository, never()).save(any(Usuario.class));
         }

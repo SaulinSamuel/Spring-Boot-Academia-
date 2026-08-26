@@ -413,12 +413,14 @@ public class MensalidadeControllerIntegrationTest {
         @Test
         void deveBuscarTodasMensalidadesComFiltroIntervaloDeDatas() throws Exception {
 
+            LocalDate hoje = LocalDate.now();
+
             mockMvc.perform(
                 get("/mensalidade/buscar")
                 .header("Authorization", "Bearer " + token)
                 .param("diasTreino", "3")
-                .param("dataCriacaoInicio", "2026-08-17")
-                .param("dataCriacaoFim", "2026-08-21")
+                .param("dataCriacaoInicio", hoje.toString())
+                .param("dataCriacaoFim", hoje.toString())
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(2));

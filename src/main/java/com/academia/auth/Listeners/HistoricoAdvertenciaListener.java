@@ -1,8 +1,7 @@
 package com.academia.auth.Listeners;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.academia.auth.Events.AdvertenciaCriadaEvent;
 import com.academia.auth.Mappers.HistoricoAdvertenciaMapper;
@@ -18,7 +17,7 @@ public class HistoricoAdvertenciaListener {
 
     private final HistoricoAdvertenciaRepository historicoAdvertenciaRepository;
 
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @EventListener
     public void aoCriarMensalidade(AdvertenciaCriadaEvent event) {
 
         Advertencia advertencia = event.advertencia();

@@ -4,9 +4,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.academia.auth.Events.UsuarioPromovidoEvent;
 import com.academia.auth.Models.AcessoAcademia;
@@ -23,7 +22,7 @@ public class UsuarioListener {
 
     private final AcessoAcademiaRepository acessoAcademiaRepository;
 
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @EventListener
     public void aoPromoverUsuario(UsuarioPromovidoEvent event) {
 
         Usuario usuarioPromovido = event.usuario();

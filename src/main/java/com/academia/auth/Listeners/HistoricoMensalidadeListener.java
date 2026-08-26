@@ -2,9 +2,8 @@ package com.academia.auth.Listeners;
 
 import com.academia.auth.Repositories.HistoricoMensalidadeRepository;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.academia.auth.Events.MensalidadeStatusAlteradoEvent;
 import com.academia.auth.Mappers.HistoricoMensalidadeMapper;
@@ -21,7 +20,7 @@ public class HistoricoMensalidadeListener {
 
     private final HistoricoMensalidadeRepository historicoMensalidadeRepository;
     
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    @EventListener
     public void aoAlterarStatus(MensalidadeStatusAlteradoEvent event) {
 
         log.info(">>> LISTENER DISPAROU para mensalidade: {}", event.mensalidade().getId());

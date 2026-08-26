@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,6 +63,20 @@ public class UsuarioControllerIntegrationTest {
         usuario.setSenha(passwordEncoder.encode("091812"));
         
         return usuario;
+    }
+
+    private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
+
+        LocalDate hoje = LocalDate.now();
+
+        AcessoAcademia acessoAcademia = AcessoAcademia.builder()
+            .diasAcesso(0)
+            .nome(usuario.getNome())
+            .usuario(usuario)
+            .inicioSemana(hoje)
+        .build();
+
+        return acessoAcademia;
     }
 
     //tests
@@ -364,6 +379,9 @@ public class UsuarioControllerIntegrationTest {
             usuarioRebaixado = criarUsuario();
             usuario.setEmail("teste@gmail.com");
             usuarioRebaixado.setRole(RoleUser.ROLE_FUNCIONARIO);
+
+            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuarioRebaixado);
+            acessoAcademiaRepository.save(acessoAcademia);
 
             List<Usuario> usuarios = List.of(usuario, usuarioRebaixado);
 

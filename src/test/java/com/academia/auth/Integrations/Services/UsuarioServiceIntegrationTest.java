@@ -3,6 +3,7 @@ package com.academia.auth.Integrations.Services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +29,10 @@ import com.academia.auth.DTOS.Usuario.UsuarioDeletarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
+import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
+import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.UsuarioService;
 import com.academia.auth.config.TestContainersConfig;
@@ -45,6 +48,9 @@ class UsuarioServiceIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AcessoAcademiaRepository acessoAcademiaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -76,6 +82,20 @@ class UsuarioServiceIntegrationTest {
         usuario.setSenha("091812");
 
         return usuario;
+    }
+
+    private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
+
+        LocalDate hoje = LocalDate.now();
+
+        AcessoAcademia acessoAcademia = AcessoAcademia.builder()
+            .diasAcesso(0)
+            .inicioSemana(hoje)
+            .usuario(usuario)
+            .nome(usuario.getNome())
+        .build();
+
+        return acessoAcademia;
     }
 
     //tests
@@ -387,6 +407,10 @@ class UsuarioServiceIntegrationTest {
             Usuario usuarioRebaixado = criarUsuario();
             usuarioRebaixado.setEmail("rebaixado@gmail.com");
             usuarioRebaixado.setRole(RoleUser.ROLE_FUNCIONARIO);
+
+            AcessoAcademia acessoAcademia = criarAcessoAcademia(usuarioRebaixado);
+            
+            acessoAcademiaRepository.save(acessoAcademia);
 
             usuarioRepository.save(usuarioRebaixado);
 

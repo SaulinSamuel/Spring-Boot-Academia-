@@ -12,6 +12,7 @@ import com.academia.auth.DTOS.Usuario.UsuarioDeletarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
 import com.academia.auth.Events.UsuarioPromovidoEvent;
+import com.academia.auth.Events.UsuarioRebaixadoEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.UsuarioMapper;
@@ -174,6 +175,10 @@ public class UsuarioService {
         }
 
         usuarioRebaixado.setRole(RoleUser.ROLE_USER);
+
+        applicationEventPublisher.publishEvent(
+            new UsuarioRebaixadoEvent(usuarioRebaixado)
+        );
 
         usuarioRepository.save(usuarioRebaixado);
         log.info("Usuário {} rebaixou usuário {} a usuário", usuario.getEmail(), usuarioRebaixado.getEmail());

@@ -1,8 +1,6 @@
 package com.academia.auth.Services;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,13 +11,12 @@ import com.academia.auth.DTOS.Usuario.UsuarioAtualizarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioDeletarDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioRequestDTO;
 import com.academia.auth.DTOS.Usuario.UsuarioResponseDTO;
+import com.academia.auth.Events.UsuarioPromovidoEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.UsuarioMapper;
-import com.academia.auth.Models.AcessoAcademia;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.RoleUser;
-import com.academia.auth.Repositories.AcessoAcademiaRepository;
 import com.academia.auth.Repositories.UsuarioRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
 
@@ -32,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UsuarioService {
     
     private final UsuarioRepository usuarioRepository;
-    private final AcessoAcademiaRepository acessoAcademiaRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioAutenticadoService usuarioLogado;
 
@@ -135,26 +132,22 @@ public class UsuarioService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Usuário {} entrou em promover usuário a funcionário", usuario.getEmail());
 
-        if (usuario.getRole() != RoleUser.ROLE_ADMIN) {
-            log.warn("Usuário {} tentou promover usuário id: {} a funcionário", usuario.getEmail(), id);
-            throw new BusinessException("Você não tem permissão para promover usuário a funcionário!");
-        }
-
         Usuario usuarioPromovido = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
         
-        if (usuarioPromovido.getRole() != RoleUser.ROLE_USER) {
+        if (usuario.getRole() != RoleUser.ROLE_ADMIN || 
+            usuarioPromovido.getRole() != RoleUser.ROLE_USER) 
+        {
             log.warn("Usuário {} tentou promover usuário {} a funcionário");
             throw new BusinessException("Você não tem permissão para promover funcionários!");
         }
 
-        usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);    
+        usuarioPromovido.setRole(RoleUser.ROLE_FUNCIONARIO);
 
-        if (usuarioPromovido.getAcessosAcademia() == null) {
-            AcessoAcademia acessoAcademia = criarAcessoAcademiaFuncionario(usuarioPromovido);
-            acessoAcademiaRepository.save(acessoAcademia);
-        }
-        
+        applicationEventPublisher.publishEvent(
+            new UsuarioPromovidoEvent(usuarioPromovido)
+        );
+
         usuarioRepository.save(usuarioPromovido);
         log.info("Usuário {} promovido a funcionário!", usuarioPromovido.getEmail());
 
@@ -209,18 +202,6 @@ public class UsuarioService {
 
         log.info("Usuário {} deletado", usuario.getEmail());
         usuarioRepository.delete(usuario);
-    }
-
-    private AcessoAcademia criarAcessoAcademiaFuncionario(Usuario usuario) {
-
-        AcessoAcademia acessosAcademia = new AcessoAcademia();
-        acessosAcademia.setUsuario(usuario);
-        acessosAcademia.setInicioSemana(LocalDate.now().with(DayOfWeek.MONDAY));
-        acessosAcademia.setDiasAcesso(0);
-        acessosAcademia.setNome(usuario.getNome());
-        usuario.setAcessosAcademia(acessosAcademia);
-
-        return acessosAcademia;
     }
 
 }

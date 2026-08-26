@@ -20,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +50,9 @@ public class UsuarioServiceTest {
     
     @Mock
     private UsuarioAutenticadoService usuarioLogado;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Mock
     private AcessoAcademiaRepository acessoAcademiaRepository;
@@ -367,16 +371,17 @@ public class UsuarioServiceTest {
                 .thenReturn(futuroFuncionario);
 
             UsuarioResponseDTO resultado = usuarioService.promoverUsuarioAFuncionario(futuroFuncionario.getId());
+            Optional<AcessoAcademia> acessoAcademia = acessoAcademiaRepository.findByUsuario(usuario);
 
             assertEquals(futuroFuncionario.getEmail(), resultado.getEmail());
             assertEquals(futuroFuncionario.getNome(), resultado.getNome());
             assertEquals(futuroFuncionario.getId(), resultado.getId());
             assertEquals(RoleUser.ROLE_FUNCIONARIO, resultado.getRole());
+            assertThat(acessoAcademia).isNotEmpty();
 
             ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
 
             verify(usuarioRepository).save(captor.capture());
-            verify(acessoAcademiaRepository).save(any(AcessoAcademia.class));
 
             Usuario usuarioCapturado = captor.getValue();
 

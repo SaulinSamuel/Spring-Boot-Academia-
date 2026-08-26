@@ -4,10 +4,12 @@ on:
   push:
     branches:
           - main
+          - develop
         
   pull_request:
     branches:
           - main
+          - develop
 
 jobs:
   build:
@@ -22,9 +24,10 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Executar testes
-        run: ./mvnw test
+      - name: Give execute permission to Maven Wrapper
+        run: chmod +x mvnw
 
-      - name: Executar build
-        run: ./mvnw package -DskipTests
+      - name: Executar testes e build
+        run: ./mvnw verify

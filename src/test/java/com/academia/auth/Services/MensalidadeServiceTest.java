@@ -122,7 +122,6 @@ public class MensalidadeServiceTest {
             assertEquals(dto.getDiasTreino(), resultado.getDiasTreino());
 
             verify(mensalidadeRepository).save(any(Mensalidade.class));
-            verify(academiaRepository).save(any(AcessoAcademia.class));
         }
 
         @Test
@@ -506,65 +505,6 @@ public class MensalidadeServiceTest {
             assertEquals("Apenas mensalidades pendentes(ou atrasadas) podem ser pagas!", exception.getMessage());
 
             verify(mensalidadeRepository, never()).save(mensalidade);
-        }
-
-    }
-
-    @Nested
-    class atrasarMensalidadesTest {
-
-        @Test
-        void deveAtrasarMensalidadesComSucesso() {
-
-            LocalDate hoje = LocalDate.now();
-
-            Mensalidade mensalidade = criarMensalidadePendente(usuario);
-
-            mensalidade.setId(1L);
-            mensalidade.setDataVencimento(hoje.minusDays(1));
-
-            List<Mensalidade> mensalidades = List.of(mensalidade);
-
-            when(mensalidadeRepository.findByStatusAndDataVencimentoBefore(
-                StatusMensalidade.PENDENTE,
-                LocalDate.now()))
-            .thenReturn(mensalidades);
-
-            mensalidadeService.atrasarMensalidades();
-
-            verify(mensalidadeRepository).findByStatusAndDataVencimentoBefore(
-                StatusMensalidade.PENDENTE,
-                LocalDate.now()
-            );
-
-            verify(mensalidadeRepository).saveAll(mensalidades);
-
-            assertEquals(StatusMensalidade.ATRASADA, mensalidades.get(0).getStatus());
-        }
-
-    }
-
-    @Nested
-    class excluirMensalidadesAposAnoTest {
-
-        @Test
-        void deveExcluirMensalidadesAposUmAnoComSucesso() {
-
-            LocalDate hoje = LocalDate.now();
-
-            Mensalidade mensalidade = criarMensalidadePendente(usuario);
-
-            mensalidade.setId(1L);
-            mensalidade.setDataCriacao(hoje.minusMonths(12));
-
-            List<Mensalidade> mensalidades = List.of(mensalidade);
-
-            when(mensalidadeRepository.findByDataCriacaoBefore(LocalDate.now().minusMonths(12)))
-                .thenReturn(mensalidades);
-
-            mensalidadeService.excluirMensalidadesAposAno();
-
-            verify(mensalidadeRepository).delete(mensalidade);
         }
 
     }

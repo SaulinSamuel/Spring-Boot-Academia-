@@ -1,9 +1,7 @@
 package com.academia.auth.Services;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -15,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
+import com.academia.auth.Events.MensalidadeCriadaEvent;
 import com.academia.auth.Events.MensalidadeStatusAlteradoEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
@@ -56,8 +55,8 @@ public class MensalidadeService {
         }
 
         LocalDate hoje = LocalDate.now();
-        LocalDate inicioMes = LocalDate.now().withDayOfMonth(1);
-        LocalDate fimMes = LocalDate.now().withDayOfMonth(inicioMes.lengthOfMonth());
+        LocalDate inicioMes = hoje.withDayOfMonth(1);
+        LocalDate fimMes = hoje.withDayOfMonth(inicioMes.lengthOfMonth());
 
         if (mensalidadeRepository.existsByUsuarioAndDataCancelamentoBetween(usuario, inicioMes, fimMes)) {
             log.warn("Usuário {} tentou cancelar mais de uma mensalidade no mês.", usuario.getEmail());
@@ -68,18 +67,9 @@ public class MensalidadeService {
 
         Mensalidade mensalidade = MensalidadeMapper.toEntity(dto);
 
-        if (usuario.getAcessosAcademia() == null) {
-
-            AcessoAcademia acessosAcademia = new AcessoAcademia();
-            acessosAcademia.setUsuario(usuario);
-            acessosAcademia.setInicioSemana(hoje.with(DayOfWeek.MONDAY));
-            acessosAcademia.setDiasAcesso(0);
-            acessosAcademia.setNome(usuario.getNome());
-            
-            academiaRepository.save(acessosAcademia);
-            
-            usuario.setAcessosAcademia(acessosAcademia);
-        }
+        applicationEventPublisher.publishEvent(
+            new MensalidadeCriadaEvent(usuario)
+        );
 
         mensalidade.setValor(valor);
         mensalidade.setDataCriacao(hoje);
@@ -250,38 +240,6 @@ public class MensalidadeService {
         );
         
         return MensalidadeMapper.toDTO(mensalidade);
-    }
-
-    // Método utilizado por um scheduler que atualiza a toda meia noite
-    @Transactional
-    public void atrasarMensalidades() {
-
-        LocalDate hoje = LocalDate.now();
-
-        List<Mensalidade> mensalidadesVencidas = mensalidadeRepository
-            .findByStatusAndDataVencimentoBefore(StatusMensalidade.PENDENTE, hoje);
-
-        for (Mensalidade mensalidade : mensalidadesVencidas) {
-            log.info("Mensalidade {} marcada como atrasada", mensalidade.getId());
-            mensalidade.setStatus(StatusMensalidade.ATRASADA);
-        }
-
-        mensalidadeRepository.saveAll(mensalidadesVencidas);
-    }
-
-    // Método utilizado por um scheduler que atualiza a meia noite e apaga todas mensalidades a um ano
-    @Transactional
-    public void excluirMensalidadesAposAno() {
-
-        LocalDate hoje = LocalDate.now();
-        LocalDate umAnoAtras = hoje.minusMonths(12);
-
-        List<Mensalidade> mensalidades = mensalidadeRepository.findByDataCriacaoBefore(umAnoAtras);
-
-        for (Mensalidade m : mensalidades) {
-            log.info("Mensalidade {} deletada após um ano", m.getId());
-            mensalidadeRepository.delete(m);
-        }
     }
 
     @Transactional

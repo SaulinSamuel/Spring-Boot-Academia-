@@ -202,7 +202,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
-					<forkedProcessExitTimeoutInSeconds>30</forkedProcessExitTimeoutInSeconds>
+					<forkedProcessExitTimeoutInSeconds>5</forkedProcessExitTimeoutInSeconds>
         			<forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
 				</configuration>
 			</plugin>

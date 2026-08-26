@@ -327,58 +327,47 @@ public class MensalidadeRepositoryTest {
     }
 
     @Test
-    void deveRetornarMensalidadesPorStatusEDataVencimentoAntes() {
+    void deveAtrasarMensalidadesPorDataVencimentoEStatus() {
 
         Usuario usuario = criarUsuario();
+        usuarioRepository.save(usuario);
 
         LocalDate hoje = LocalDate.now();
 
         Mensalidade mensalidade = criarMensalidadePendente(usuario);
-        mensalidade.setDataVencimento(hoje.minusDays(1));
+        mensalidade.setDataVencimento(hoje.minusMonths(1));
 
-        Mensalidade mensalidade2 = criarMensalidadePendente(usuario);
+        mensalidadeRepository.save(mensalidade);
 
-        List<Mensalidade> mensalidades = List.of(mensalidade, mensalidade2);
-
-        usuarioRepository.save(usuario);
-
-        mensalidadeRepository.saveAll(mensalidades);
-
-        List<Mensalidade> resultado = mensalidadeRepository.findByStatusAndDataVencimentoBefore(
-            StatusMensalidade.PENDENTE,
+        mensalidadeRepository.atrasarMensalidades(
+            StatusMensalidade.ATRASADA, 
+            StatusMensalidade.PENDENTE, 
             hoje
         );
 
-        assertNotNull(resultado);
+        Optional<Mensalidade> mensalidadeAtrasada = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario);
 
-        assertThat(resultado).extracting(Mensalidade::getId)
-            .containsExactlyInAnyOrder(mensalidade.getId());
+        assertThat(mensalidadeAtrasada.get().getStatus()).isEqualTo(StatusMensalidade.ATRASADA);
     }
 
     @Test
-    void deveRetornarMensalidadesPorDataDeCriacaoAntes() {
-
+    void deveExcluirMensalidadesAposAno() {
+       
         Usuario usuario = criarUsuario();
-
-        LocalDate hoje = LocalDate.now();
-
-        Mensalidade mensalidade = criarMensalidadePendente(usuario);
-        mensalidade.setDataCriacao(hoje.minusDays(1));
-
-        Mensalidade mensalidade2 = criarMensalidadePendente(usuario);
-
-        List<Mensalidade> mensalidades = List.of(mensalidade, mensalidade2);
-
         usuarioRepository.save(usuario);
 
-        mensalidadeRepository.saveAll(mensalidades);
+        LocalDate umAno = LocalDate.now().minusYears(1);
 
-        List<Mensalidade> resultado = mensalidadeRepository.findByDataCriacaoBefore(hoje);
+        Mensalidade mensalidade = criarMensalidadePendente(usuario);
+        mensalidade.setStatus(StatusMensalidade.CANCELADA);
+        mensalidade.setDataCriacao(umAno);
+        mensalidadeRepository.save(mensalidade);
 
-        assertNotNull(resultado);
+        mensalidadeRepository.excluirMensalidadesAposAno(umAno);
 
-        assertThat(resultado).extracting(Mensalidade::getId)
-            .containsExactlyInAnyOrder(mensalidade.getId());
+        Optional<Mensalidade> mensalidadeExcluida = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario);
+
+        assertThat(mensalidadeExcluida).isEmpty();
     }
 
 }

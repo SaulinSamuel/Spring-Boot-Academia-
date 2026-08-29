@@ -30,7 +30,7 @@ public class UsuarioController {
     
     private final UsuarioService usuarioService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO', 'INSTRUTOR')")
     @PutMapping("/atualizar")
     public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@Valid @RequestBody UsuarioAtualizarDTO dto) {
 
@@ -39,7 +39,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/listar")
     public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuarios(
         @PageableDefault(size = 12, sort = "nome") Pageable pageable) {
@@ -49,7 +49,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarios);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuariosPorNome(
         @PageableDefault(size = 12, sort = "nome") Pageable pageable,
@@ -79,7 +79,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> meusDados() {
 
@@ -88,7 +88,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'FUNCIONARIO', 'INSTRUTOR')")
     @DeleteMapping
     public ResponseEntity<Void> deletarUsuario(@Valid @RequestBody UsuarioDeletarDTO dto) {
 

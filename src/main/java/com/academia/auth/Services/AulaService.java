@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.academia.auth.DTOS.Aula.AulaRequestDTO;
 import com.academia.auth.DTOS.Aula.AulaResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
-import com.academia.auth.Exceptions.CriarAulaException;
+import com.academia.auth.Exceptions.AulaException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.AulaMapper;
 import com.academia.auth.Models.Aula;
@@ -37,7 +37,7 @@ public class AulaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() != RoleUser.ROLE_INSTRUTOR) {
-            throw new CriarAulaException("Você não tem permissão para criar aulas!");
+            throw new AulaException("Você não tem permissão para criar aulas!");
         }
 
         Optional<Aula> aulaExistente = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario);
@@ -46,7 +46,7 @@ public class AulaService {
             aulaExistente.get().getStatus() != StatusAula.CONCLUIDA &&
             aulaExistente.get().getStatus() != StatusAula.CANCELADA) 
         {
-            throw new CriarAulaException("Você não pode criar aulas enquanto não concluir atual!");
+            throw new AulaException("Você não pode criar aulas enquanto não concluir atual!");
         }
 
         Aula aula = AulaMapper.toEntity(dto);
@@ -65,7 +65,7 @@ public class AulaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() != RoleUser.ROLE_INSTRUTOR) {
-            throw new CriarAulaException("Você não tem permissão para criar aulas!");
+            throw new AulaException("Você não tem permissão para criar aulas!");
         }
 
         Aula aula = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario)
@@ -81,6 +81,8 @@ public class AulaService {
         aula.setHorarioInicio(dto.horarioInicio());
         aula.setNome(dto.nome());
 
+        aulaRepository.save(aula);
+
         return AulaMapper.toDTO(aula);
     }
 
@@ -90,14 +92,14 @@ public class AulaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() != RoleUser.ROLE_INSTRUTOR) {
-            throw new BusinessException("Você não tem permissão para confirmar aulas!");
+            throw new AulaException("Você não tem permissão para confirmar aulas!");
         }
 
         Aula aula = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Aula não encontrada!"));
 
         if (aula.getStatus() != StatusAula.PENDENTE) {
-            throw new BusinessException("Apenas aulas pendentes podem ser confirmadas!");
+            throw new AulaException("Apenas aulas pendentes podem ser confirmadas!");
         }
 
         aula.setStatus(StatusAula.CONFIRMADA);
@@ -113,14 +115,14 @@ public class AulaService {
         Usuario usuario = usuarioLogado.usuarioLogado();
 
         if (usuario.getRole() != RoleUser.ROLE_INSTRUTOR) {
-            throw new BusinessException("Você não tem permissão para cancelar aulas!");
+            throw new AulaException("Você não tem permissão para cancelar aulas!");
         }
 
         Aula aula = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Aula não encontrada!"));
 
         if (aula.getStatus() != StatusAula.PENDENTE) {
-            throw new BusinessException("Apenas aulas pendentes podem ser canceladas!");
+            throw new AulaException("Apenas aulas pendentes podem ser canceladas!");
         }
 
         aula.setStatus(StatusAula.CANCELADA);
@@ -132,13 +134,7 @@ public class AulaService {
 
     public Page<AulaResponseDTO> buscarTodasAulas(Pageable pageable) {
 
-        Usuario usuario = usuarioLogado.usuarioLogado();
-
-        if (usuario.getRole() == null) {
-            throw new BusinessException("Sem permissão para buscar todas as aulas!");
-        }
-
-        Page<Aula> aulas = aulaRepository.findAll(pageable);
+        Page<Aula> aulas = aulaRepository.findAllOrdenadaPorRelevancia(pageable);
 
         return aulas
             .map(AulaMapper::toDTO);
@@ -148,8 +144,7 @@ public class AulaService {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
-        if (usuario.getRole() != RoleUser.ROLE_ADMIN &&
-            usuario.getRole() != RoleUser.ROLE_FUNCIONARIO)
+        if (usuario.getRole() != RoleUser.ROLE_INSTRUTOR)
         {
             throw new BusinessException("Você não tem permissão de visualizar aulas!");
         }
@@ -162,12 +157,6 @@ public class AulaService {
 
     public AulaResponseDTO buscarAulaPorId(Long id) {
 
-        Usuario usuario = usuarioLogado.usuarioLogado();
-
-        if (usuario.getRole() == null) {
-            throw new BusinessException("Sem permissão para visualizar aula!");
-        }
-
         Aula aula = aulaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Aula não encontrada!"));
 
@@ -175,7 +164,7 @@ public class AulaService {
     }
 
     @Transactional
-    public void excluirAula() {
+    public void excluirAula(Long id) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
 
@@ -183,13 +172,17 @@ public class AulaService {
             throw new BusinessException("Você não tem permissão para excluir aulas!");
         }
 
-        Aula aula = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario)
+        Aula aula = aulaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Aula não encontrada!"));
 
-        if (aula.getStatus() != StatusAula.CONCLUIDA ||
-            aula.getStatus() != StatusAula.CANCELADA) 
+        if (!aula.getInstrutor().getId().equals(usuario.getId())) {
+            throw new BusinessException("Você não tem permissão de excluir essa aula!");
+        }
+
+        if (aula.getStatus() != StatusAula.CONCLUIDA &&
+            aula.getStatus() != StatusAula.CANCELADA)
         {
-            throw new BusinessException("Apenas aulas concluidas(ou canceladas) podem ser canceladas!");
+            throw new BusinessException("Apenas aulas concluidas(ou canceladas) podem ser excluidas!");
         }
 
         aulaRepository.delete(aula);

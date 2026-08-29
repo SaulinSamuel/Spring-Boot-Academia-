@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(CriarAulaException.class)
-    public ResponseEntity<String> handleCriarAula(CriarAulaException ex) {
+    @ExceptionHandler(AulaException.class)
+    public ResponseEntity<String> handleCriarAula(AulaException ex) {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }

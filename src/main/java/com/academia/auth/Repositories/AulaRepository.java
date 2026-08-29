@@ -20,6 +20,12 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
 
     Page<Aula> findAllByInstrutor(Usuario instrutor, Pageable pageable);
 
+    @Query("""
+            SELECT a FROM Aula a
+            ORDER BY CASE WHEN a.status = 'PENDENTE' THEN 0 ELSE 1 END, a.dataAula ASC
+            """)
+    Page<Aula> findAllOrdenadaPorRelevancia(Pageable pageable);
+
     @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE Aula a
@@ -32,5 +38,18 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
         @Param("statusNovo") StatusAula statusNovo,
         @Param("tempoLimite") LocalDateTime tempoLimite
     );  
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE Aula a
+            SET a.status = :statusNovo
+            WHERE a.status = :status
+            AND FUNCTION('TIMESTAMP', a.dataAula, a.horarioFim) <= :agora
+            """)
+    int concluirAulas(
+        @Param("statusNovo") StatusAula statusNovo,
+        @Param("status") StatusAula status,
+        @Param("agora") LocalDateTime agora
+    );
 
 }

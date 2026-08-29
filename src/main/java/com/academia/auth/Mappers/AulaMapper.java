@@ -10,6 +10,7 @@ public class AulaMapper {
 
         Aula aula = Aula.builder()
             .capacidadeInscricoes(dto.capacidadeInscricoes())
+            .nome(dto.nome())
             .dataAula(dto.dataAula())
             .horarioFim(dto.horarioFim())
             .horarioInicio(dto.horarioInicio())

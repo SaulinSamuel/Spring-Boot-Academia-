@@ -85,6 +85,14 @@ public class Usuario implements UserDetails {
     )
     private List<Aula> aulas;
 
+    @OneToMany(
+        fetch = FetchType.LAZY, 
+        mappedBy = "usuario", 
+        cascade = CascadeType.ALL, 
+        orphanRemoval = true
+    )
+    private List<Agendamento> agendamentos;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private RoleUser role = RoleUser.ROLE_USER;

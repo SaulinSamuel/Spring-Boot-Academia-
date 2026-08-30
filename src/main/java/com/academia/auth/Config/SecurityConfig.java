@@ -63,6 +63,7 @@ public class SecurityConfig {
                 .requestMatchers("/historico-mensalidade/**").authenticated()
                 .requestMatchers("/avaliacao-fisica/**").authenticated()
                 .requestMatchers("/aula/**").authenticated()
+                .requestMatchers("/agendamento/**").authenticated()
                 .anyRequest().authenticated()
             )
 

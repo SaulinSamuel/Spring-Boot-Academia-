@@ -33,7 +33,7 @@ public class AdvertenciaController {
     
     private final AdvertenciaService advertenciaService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @PostMapping("/{id}/enviar")
     public ResponseEntity<AdvertenciaResponseDTO> enviarAdvertencia(
     @PathVariable Long id,
@@ -44,7 +44,7 @@ public class AdvertenciaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(advertencia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<AdvertenciaResponseDTO>> buscarAdvertenciasPorFiltro(
         @RequestParam(required = false) String remetente,
@@ -69,7 +69,7 @@ public class AdvertenciaController {
         return ResponseEntity.ok(advertencias);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/{id}/buscar")
     public ResponseEntity<AdvertenciaResponseDTO> buscarAdvertenciaPorId(@PathVariable Long id) {
 
@@ -78,7 +78,7 @@ public class AdvertenciaController {
         return ResponseEntity.ok(advertencia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER', 'INSTRUTOR')")
     @GetMapping("/recebidas/me")
     public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarSuasAdvertenciasRecebidas(
         @PageableDefault(size = 12, sort = "destinatario") Pageable pageable
@@ -89,7 +89,7 @@ public class AdvertenciaController {
         return ResponseEntity.ok(advertencias);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/enviadas/me")
     public ResponseEntity<Page<AdvertenciaResponseDTO>> mostrarSuasAdvertenciasEnviadas(
         @PageableDefault(size = 12, sort = "remetente") Pageable pageable
@@ -100,7 +100,7 @@ public class AdvertenciaController {
         return ResponseEntity.ok(advertencias);    
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @DeleteMapping("/{id}/deletar")
     public ResponseEntity<Void> excluirAdvertencia(@PathVariable Long id) {
 

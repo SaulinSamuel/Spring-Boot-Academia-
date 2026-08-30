@@ -14,7 +14,7 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
 
     @Query("""
             SELECT COUNT(a.id) > 0
-            FROM Agendamento     a
+            FROM Agendamento a
             JOIN a.aula au          
             WHERE a.usuario.id = :usuarioId
                 AND au.id <> :aulaId    

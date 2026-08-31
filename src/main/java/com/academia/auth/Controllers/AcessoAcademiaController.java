@@ -26,7 +26,7 @@ public class AcessoAcademiaController {
     
     private final AcessoAcademiaService academiaService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @PostMapping("/alunos")
     public ResponseEntity<AcessoAcademiaResponseDTO> acessarAcademia(@RequestBody @Valid AcessoAcademiaRequestDTO dto) {
 
@@ -35,7 +35,7 @@ public class AcessoAcademiaController {
         return ResponseEntity.ok(acessoAcademia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @PostMapping("/funcionarios")
     public ResponseEntity<AcessoAcademiaResponseDTO> acessarAcademiaFuncionario(@RequestBody @Valid AcessoAcademiaRequestDTO dto) {
 
@@ -44,7 +44,7 @@ public class AcessoAcademiaController {
         return ResponseEntity.ok(acessoAcademia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'USER', 'INSTRUTOR')")
     @GetMapping("/me")
     public ResponseEntity<AcessoAcademiaResponseDTO> buscarSeuAcesso() {
 
@@ -53,7 +53,7 @@ public class AcessoAcademiaController {
         return ResponseEntity.ok(acessoAcademia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/buscar")
     public ResponseEntity<Page<AcessoAcademiaResponseDTO>> buscarTodosAcessos(@PageableDefault(size = 12, sort = "usuario") Pageable pageable) {
 
@@ -62,7 +62,7 @@ public class AcessoAcademiaController {
         return ResponseEntity.ok(acessosAcademia);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<AcessoAcademiaResponseDTO>> buscarAcessosPorNome(
         @PageableDefault(size = 12, sort = "nome") Pageable pageable,

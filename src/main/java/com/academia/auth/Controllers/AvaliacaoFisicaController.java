@@ -32,7 +32,7 @@ public class AvaliacaoFisicaController {
 
     private final AvaliacaoFisicaService avaliacaoFisicaService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @PostMapping("/{id}")
     public ResponseEntity<AvaliacaoResponseDTO> criarAvaliacaoFisica(
         @RequestBody @Valid AvaliacaoRequestDTO dto,
@@ -45,7 +45,7 @@ public class AvaliacaoFisicaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(avaliacaoFisica);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @PutMapping("/{id}")
     public ResponseEntity<AvaliacaoResponseDTO> editarAvaliacaoFisica(
         @RequestBody @Valid AvaliacaoRequestDTO dto,
@@ -71,7 +71,7 @@ public class AvaliacaoFisicaController {
         return ResponseEntity.ok(avaliacoesFisicas);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/me/criadas")
     public ResponseEntity<Page<AvaliacaoResponseDTO>> buscarSuasAvaliacoesFisicasCriadas(
         @PageableDefault(size = 12, sort = "dataAvaliacao") Pageable pageable
@@ -83,7 +83,7 @@ public class AvaliacaoFisicaController {
         return ResponseEntity.ok(avaliacoesFisicas);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/{id}/buscar")
     public ResponseEntity<AvaliacaoResponseDTO> buscarAvaliacaoFisicaPorId(@PathVariable Long id) {
 
@@ -92,7 +92,7 @@ public class AvaliacaoFisicaController {
         return ResponseEntity.ok(avaliacaoFisica);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<AvaliacaoResponseDTO>> buscarTodasAvaliacoesFisicasPorFiltro(
         @RequestParam(required = false) String aluno,
@@ -115,6 +115,7 @@ public class AvaliacaoFisicaController {
         return ResponseEntity.ok(avaliacoesFisicas);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirAvaliacaoFisica(@PathVariable Long id) {
 

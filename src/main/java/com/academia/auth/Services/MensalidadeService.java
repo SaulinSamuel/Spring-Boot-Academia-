@@ -252,9 +252,10 @@ public class MensalidadeService {
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
         if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
-        mensalidade.getStatus() != StatusMensalidade.CANCELADA) {
+            mensalidade.getStatus() != StatusMensalidade.CANCELADA) 
+        {
 
-            log.warn("Usuário {} tentou cancelar mensalidade {} atrasada ou pendente", usuario.getEmail(), mensalidade.getId());
+            log.warn("Usuário {} tentou excluir mensalidade {} atrasada ou pendente", usuario.getEmail(), mensalidade.getId());
             throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
         }
 

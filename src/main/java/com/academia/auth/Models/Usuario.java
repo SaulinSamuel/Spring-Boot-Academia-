@@ -73,11 +73,25 @@ public class Usuario implements UserDetails {
 
     @OneToOne(
         fetch = FetchType.LAZY,
-        mappedBy = "usuario",
+        mappedBy = "usuario"
+    )
+    private AcessoAcademia acessosAcademia;
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "instrutor",
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
-    private AcessoAcademia acessosAcademia;
+    private List<Aula> aulas;
+
+    @OneToMany(
+        fetch = FetchType.LAZY, 
+        mappedBy = "usuario", 
+        cascade = CascadeType.ALL, 
+        orphanRemoval = true
+    )
+    private List<Agendamento> agendamentos;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

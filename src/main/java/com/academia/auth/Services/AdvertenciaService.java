@@ -149,8 +149,10 @@ public class AdvertenciaService {
         Advertencia advertencia = advertenciaRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Advertência não encontrada!"));
 
-        if (!advertencia.getRemetente().getId().equals(usuario.getId()) &&
-            usuario.getRole() != RoleUser.ROLE_ADMIN) 
+        boolean isAdmin = usuario.getRole() == RoleUser.ROLE_ADMIN;
+        boolean isAvaliador = advertencia.getRemetente().getId().equals(usuario.getId());
+
+        if (!isAdmin && !isAvaliador) 
         {
             throw new BusinessException("Você não tem permissão para excluir essa advertência!");
         }

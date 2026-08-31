@@ -1,5 +1,6 @@
 package com.academia.auth.Services;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -46,6 +47,7 @@ public class AcessoAcademiaService {
     private final MensalidadeRepository mensalidadeRepository;
     private final UsuarioAutenticadoService usuarioLogado;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final Clock clock;
 
     @Transactional
     public AcessoAcademiaResponseDTO acessarAcademia(AcessoAcademiaRequestDTO dto) {
@@ -79,7 +81,7 @@ public class AcessoAcademiaService {
 
         validarAcessoAcademiaAluno(acessoAcademia, mensalidade, usuario);
 
-        LocalDate hoje = LocalDate.now();
+        LocalDate hoje = LocalDate.now(clock);
 
         acessoAcademia.setUltimoAcesso(hoje);
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
@@ -114,7 +116,7 @@ public class AcessoAcademiaService {
 
         validarAcessoAcademiaFuncionario(acessoAcademia, usuario);
 
-        LocalDate hoje = LocalDate.now();
+        LocalDate hoje = LocalDate.now(clock);
 
         acessoAcademia.setDiasAcesso(acessoAcademia.getDiasAcesso() + 1);
         acessoAcademia.setUltimoAcesso(hoje);
@@ -177,7 +179,11 @@ public class AcessoAcademiaService {
         Usuario usuario) 
     {
         
-        LocalDate hoje = LocalDate.now();
+        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
+            throw new AcessoAcademiaException("Esse acesso não pertence a você!");
+        }
+
+        LocalDate hoje = LocalDate.now(clock);
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
         DayOfWeek dia = hoje.getDayOfWeek();
 
@@ -200,19 +206,20 @@ public class AcessoAcademiaService {
             log.warn("Usuário {} tentou acessar mais de {} vezes na semana", usuario.getEmail(), mensalidade.getDiasTreino());
             throw new AcessoAcademiaException("Máximo de dias de treino na semana atingidos!");
         }
-
-        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
-            throw new AcessoAcademiaException("Esse acesso não pertence a você!");
-        }
-
+        
     }
 
     public void validarAcessoAcademiaFuncionario(AcessoAcademia acessoAcademia, Usuario usuario) {
 
-        LocalDate hoje = LocalDate.now();
+        LocalDate hoje = LocalDate.now(clock);
         LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
         DayOfWeek dia = hoje.getDayOfWeek();
-
+        
+        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
+            log.warn("Usuário {} tentou acessar com acesso inválido id: {}", usuario.getEmail(), acessoAcademia.getId());
+            throw new AcessoAcademiaException("Esse acesso de academia não pertence a você!");
+        }
+        
         if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
             log.warn("Usuário {} tentou entrar na academia no sábado e domingo", usuario.getEmail());
             throw new AcessoAcademiaException("Academia não é aberta aos sábados e domingos!");
@@ -223,15 +230,11 @@ public class AcessoAcademiaService {
             acessoAcademia.setDiasAcesso(0);
         }   
 
-        if (LocalDate.now().equals(acessoAcademia.getUltimoAcesso())) {
+        if (hoje.equals(acessoAcademia.getUltimoAcesso())) {
             log.warn("Usuário {} tentou acessar mais de uma vez no dia", usuario.getEmail());
             throw new AcessoAcademiaException("Você já acessou a academia hoje!");
         }
 
-        if (!acessoAcademia.getUsuario().getId().equals(usuario.getId())) {
-            log.warn("Usuário {} tentou acessar com acesso inválido id: {}", usuario.getEmail(), acessoAcademia.getId());
-            throw new AcessoAcademiaException("Esse acesso de academia não pertence a você!");
-        }
     }
 
     public void validarAdvertenciasAluno(Usuario usuario) {

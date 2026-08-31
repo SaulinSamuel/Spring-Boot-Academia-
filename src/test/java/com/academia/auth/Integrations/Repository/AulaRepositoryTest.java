@@ -33,14 +33,13 @@ public class AulaRepositoryTest {
     private Aula criarAula(Usuario instrutor) {
 
         LocalDate hoje = LocalDate.now();
-        LocalTime inicio = LocalTime.now().plusHours(2);
-        LocalTime fim = inicio.plusHours(1);
-
+        LocalTime inicio = LocalTime.of(10, 0);
+        
         Aula aula = Aula.builder()
             .capacidadeInscricoes(10)
             .dataAula(hoje)
             .horarioInicio(inicio)
-            .horarioFim(fim)
+            .horarioFim(inicio.plusHours(2))
             .instrutor(instrutor)
             .status(StatusAula.PENDENTE)
             .nome("Aula treino inferiores")
@@ -68,19 +67,20 @@ public class AulaRepositoryTest {
         usuarioRepository.save(usuario);
 
         Aula aula = criarAula(usuario);
-        aulaRepository.save(aula);
+        aulaRepository.saveAndFlush(aula);
 
-        LocalDateTime agora = LocalDateTime.now();
-        LocalDateTime tempoLimite = agora.plusHours(2);
+        LocalDate hoje = LocalDate.now();
+        LocalDateTime tempoLimite = LocalDateTime.of(hoje, LocalTime.of(12, 0));
 
-        aulaRepository.cancelarAulas(
+        int linhasAfetadas = aulaRepository.cancelarAulas(
             StatusAula.PENDENTE,
-            StatusAula.CANCELADA, 
+            StatusAula.CANCELADA,
             tempoLimite
         );
 
-        Optional<Aula> aulaCancelada = aulaRepository.findTopByInstrutorOrderByIdDesc(usuario);
+        Optional<Aula> aulaCancelada = aulaRepository.findById(aula.getId());
     
+        assertThat(linhasAfetadas).isEqualTo(1);
         assertThat(aulaCancelada.get().getStatus()).isEqualTo(StatusAula.CANCELADA);
     }
 

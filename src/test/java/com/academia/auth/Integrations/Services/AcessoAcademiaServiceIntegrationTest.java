@@ -4,8 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -14,7 +15,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +53,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestContainersConfig.class)
+@Import({TestContainersConfig.class,
+    AcessoAcademiaServiceIntegrationTest.ClockTestConfig.class}
+)
 @Transactional
 public class AcessoAcademiaServiceIntegrationTest {
     
@@ -71,14 +77,25 @@ public class AcessoAcademiaServiceIntegrationTest {
     @Autowired
     private MensalidadeRepository mensalidadeRepository;
 
+    private static final LocalDate DIA_UTIL_FIXO = LocalDate.of(2026, 8, 31);
+
+    @TestConfiguration
+    static class ClockTestConfig {
+        @Bean
+        @Primary
+        Clock clockDeTeste() {
+            return Clock.fixed(
+                DIA_UTIL_FIXO.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                ZoneId.systemDefault()
+            );
+        }
+    }
 
     private AcessoAcademia criarAcessoAcademia(Usuario usuario) {
 
-        LocalDate hoje = LocalDate.now();
-
         AcessoAcademia acessoAcademia = AcessoAcademia.builder()
             .diasAcesso(0)
-            .inicioSemana(hoje)
+            .inicioSemana(DIA_UTIL_FIXO)
             .usuario(usuario)
             .nome(usuario.getNome())
         .build();
@@ -100,12 +117,10 @@ public class AcessoAcademiaServiceIntegrationTest {
 
     private Mensalidade criarMensalidade(Usuario usuario) {
 
-        LocalDate hoje = LocalDate.now();
-
         Mensalidade m = new Mensalidade();
         m.setValor(BigDecimal.valueOf(45));
-        m.setDataCriacao(hoje);
-        m.setDataVencimento(hoje.plusMonths(1));
+        m.setDataCriacao(DIA_UTIL_FIXO);
+        m.setDataVencimento(DIA_UTIL_FIXO.plusMonths(1));
         m.setUsuario(usuario);
         m.setDataPagamento(null);
         m.setDataCancelamento(null);
@@ -118,22 +133,20 @@ public class AcessoAcademiaServiceIntegrationTest {
 
     private Advertencia criarAdvertencia(Usuario remetente, Usuario destinatario) {
 
-        LocalDateTime hoje = LocalDateTime.now();
-
         Advertencia advertencia = new Advertencia();
 
         advertencia.setRemetente(remetente);
         advertencia.setDestinatario(destinatario);
         advertencia.setMensagem("Quebrou!");
         advertencia.setNivelAdvertencia(AdvertenciaStatus.LEVE);
-        advertencia.setDataCriacao(hoje);
-        advertencia.setDataExpiracao(hoje.plusDays(3));
+        advertencia.setDataCriacao(DIA_UTIL_FIXO.atTime(20, 0));
+        advertencia.setDataExpiracao(DIA_UTIL_FIXO.atTime(20, 0).plusDays(3));
 
         return advertencia;
     }   
 
     @Nested
-    class acessarAcademiaTest {
+    class AcessarAcademiaTest {
 
         private Usuario aluno;
         private Mensalidade mensalidade;
@@ -163,7 +176,7 @@ public class AcessoAcademiaServiceIntegrationTest {
             AcessoAcademiaResponseDTO resultado = acessoAcademiaService.acessarAcademia(dto);
 
             assertThat(resultado.getDiasAcessoSemana()).isEqualTo(1);
-            assertThat(resultado.getUltimoAcesso()).isEqualTo(LocalDate.now());
+            assertThat(resultado.getUltimoAcesso()).isEqualTo(DIA_UTIL_FIXO);
             assertThat(resultado.getRole()).isEqualTo(RoleUser.ROLE_USER);
         }
 
@@ -222,10 +235,15 @@ public class AcessoAcademiaServiceIntegrationTest {
         @Test
         void deveImpedirAcessoSeNaoExistirAcessoAcademia() {
 
-            acessoAcademia.setUsuario(null);
+            Usuario alunoSemAcesso = criarUsuario();
+            alunoSemAcesso.setEmail("semacesso@gmail.com");
+            usuarioRepository.save(alunoSemAcesso);
+
+            Mensalidade mensalidade = criarMensalidade(alunoSemAcesso);
+            mensalidadeRepository.save(mensalidade);
 
             AcessoAcademiaRequestDTO dto = new AcessoAcademiaRequestDTO(
-                aluno.getEmail(),
+                alunoSemAcesso.getEmail(),
                 "091812"
             );
 
@@ -240,7 +258,7 @@ public class AcessoAcademiaServiceIntegrationTest {
     }
 
     @Nested
-    class acessarAcademiaFuncionarioTest {
+    class AcessarAcademiaFuncionarioTest {
 
         private Usuario usuario;
         private AcessoAcademia acessoAcademia;
@@ -283,7 +301,7 @@ public class AcessoAcademiaServiceIntegrationTest {
             AcessoAcademiaResponseDTO resultado = acessoAcademiaService.acessarAcademiaFuncionario(dto);
 
             assertThat(resultado.getUsuario()).isEqualTo(usuario.getNome());
-            assertThat(resultado.getUltimoAcesso()).isEqualTo(LocalDate.now());
+            assertThat(resultado.getUltimoAcesso()).isEqualTo(DIA_UTIL_FIXO);
         }
 
         @Test
@@ -343,7 +361,7 @@ public class AcessoAcademiaServiceIntegrationTest {
     }   
 
     @Nested
-    class buscarSeuAcessoTest {
+    class BuscarSeuAcessoTest {
 
         private Usuario usuario;
         private AcessoAcademia acessoAcademia;
@@ -385,7 +403,14 @@ public class AcessoAcademiaServiceIntegrationTest {
         @Test
         void deveRetornarAcessoNaoEncontradoSeNaoExistir() {
 
-            acessoAcademia.setUsuario(null);
+            Usuario usuarioSemAcesso = criarUsuario();
+            usuarioSemAcesso.setEmail("semacesso@gmail.com");
+            usuarioRepository.save(usuarioSemAcesso);
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                usuarioSemAcesso, null, usuarioSemAcesso.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             ResourceNotFound except = assertThrows(
                 ResourceNotFound.class,
@@ -398,7 +423,7 @@ public class AcessoAcademiaServiceIntegrationTest {
     }
 
     @Nested
-    class buscarTodosAcessoTest {
+    class BuscarTodosAcessoTest {
 
         private Usuario usuario;
 
@@ -460,7 +485,7 @@ public class AcessoAcademiaServiceIntegrationTest {
     }
 
     @Nested
-    class buscarAcessoPorNomeTest {
+    class BuscarAcessoPorNomeTest {
 
         private Usuario usuario;
 
@@ -521,7 +546,7 @@ public class AcessoAcademiaServiceIntegrationTest {
     }
 
     @Nested
-    class validarAdvertenciasAlunoTest {
+    class ValidarAdvertenciasAlunoTest {
 
         private Usuario remetente;
         private Usuario destinatario;
@@ -604,7 +629,7 @@ public class AcessoAcademiaServiceIntegrationTest {
             advertencia2.setNivelAdvertencia(AdvertenciaStatus.LEVE);
 
             Advertencia advertencia3 = criarAdvertencia(remetente, destinatario);
-            advertencia.setNivelAdvertencia(AdvertenciaStatus.LEVE);
+            advertencia3.setNivelAdvertencia(AdvertenciaStatus.LEVE);
 
             List<Advertencia> advertencias = List.of(advertencia, advertencia2, advertencia3);
 

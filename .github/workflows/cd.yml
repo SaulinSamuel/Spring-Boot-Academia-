@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
 
@@ -22,11 +28,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-        - name: Give execute permission to Maven Wrapper
-          run: chmod +x mvnw
+      - name: Give execute permission to Maven Wrapper
+        run: chmod +x mvnw
 
-        - name: Executar testes
-          run: ./mvnw verify -B
+      - name: Executar testes
+        run: ./mvnw verify -B
 
-        - name: Construir imagem Docker
-          run: docker build -t academia-api:${{ github.sha }} .
+      - name: Construir imagem Docker
+        run: docker build -t academia-api:${{ github.sha }} .

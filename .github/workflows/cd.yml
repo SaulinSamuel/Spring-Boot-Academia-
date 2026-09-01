@@ -1,0 +1,32 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  docker:
+    name: Build docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+        - name: Give execute permission to Maven Wrapper
+          run: chmod +x mvnw
+
+        - name: Executar testes
+          run: ./mvnw verify -B
+
+        - name: Construir imagem Docker
+          run: docker build -t academia-api:${{ github.sha }} .

@@ -62,7 +62,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidades);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/buscar")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarTodasMensalidadesComFiltro(
         MensalidadeFilterDatesDTO filterDatesDTO,
@@ -78,7 +78,7 @@ public class MensalidadeController {
         return ResponseEntity.ok(mensalidades);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR')")
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<MensalidadeResponseDTO>> buscarMensalidadesPorNome(
         @PageableDefault(size = 12, sort = "usuario.nome") Pageable pageable,

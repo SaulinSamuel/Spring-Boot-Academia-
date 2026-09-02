@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: academia
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: academia_user
       MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
@@ -24,6 +24,7 @@ services:
       db:
         condition: service_healthy
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DATABASE_URL: jdbc:mysql://db:3306/academia
       DB_USERNAME: academia_user
       DB_PASSWORD: ${DB_PASSWORD}

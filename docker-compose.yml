@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DATABASE_URL: jdbc:mysql://db:3306/academia
       DB_USERNAME: academia_user
       DB_PASSWORD: ${DB_PASSWORD}

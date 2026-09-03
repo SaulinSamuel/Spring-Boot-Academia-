@@ -65,7 +65,7 @@ jobs:
           IMG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
           ENCODED_IMG=$(jq -rn --arg v "$IMG" '$v|@uri')
 
-          RESPONSE=$(curl -s -w "\n%{http_code}" "${{ secrets.RENDER_DEPLOY_HOOK }}&imgURL=${ENCODED_IMG}")
+          RESPONSE=$(curl -s -w "\n%{http_code}" "${{ secrets.DEPLOY_HOOK_API_ACADEMIA }}&imgURL=${ENCODED_IMG}")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | sed '$d')
 

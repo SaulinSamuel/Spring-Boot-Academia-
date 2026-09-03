@@ -3,8 +3,7 @@ name: CD
 on:
   push:
     branches:
-      - main
-      - develop
+      - main  
 
 permissions:
   contents: read
@@ -53,3 +52,19 @@ jobs:
         run: |
           docker push \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy no render
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy no Render
+        uses: JorgeLNJunior/render-deploy@v1.5.0
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}
+          wait_deploy: true
+
+          
+

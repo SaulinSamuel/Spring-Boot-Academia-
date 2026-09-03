@@ -53,7 +53,7 @@ jobs:
           docker push \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-    deploy:
+  deploy:
     name: Deploy no Render
     needs: docker
     runs-on: ubuntu-latest

@@ -53,18 +53,60 @@ jobs:
           docker push \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  deploy:
-    name: Deploy no render
+    deploy:
+    name: Deploy no Render
     needs: docker
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy no Render
-        uses: JorgeLNJunior/render-deploy@v1.5.0
-        with:
-          service_id: ${{ secrets.RENDER_SERVICE_ID }}
-          api_key: ${{ secrets.RENDER_API_KEY }}
-          wait_deploy: true
+      - name: Disparar deploy e capturar o ID
+        id: trigger
+        run: |
+          IMG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          ENCODED_IMG=$(jq -rn --arg v "$IMG" '$v|@uri')
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" "${{ secrets.RENDER_DEPLOY_HOOK }}&imgURL=${ENCODED_IMG}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Falha ao disparar o deploy (HTTP $HTTP_CODE): $BODY"
+            exit 1
+          fi
+
+          DEPLOY_ID=$(echo "$BODY" | jq -r '.deploy.id')
+          echo "Deploy disparado: $DEPLOY_ID"
+          echo "deploy_id=$DEPLOY_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Esperar o deploy concluir
+        run: |
+          DEPLOY_ID="${{ steps.trigger.outputs.deploy_id }}"
+
+          for i in $(seq 1 60); do
+            STATUS=$(curl -s \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              -H "Accept: application/json" \
+              "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/${DEPLOY_ID}" \
+              | jq -r '.status')
+
+            echo "Status atual: $STATUS"
+
+            case "$STATUS" in
+              live)
+                echo "Deploy concluído com sucesso."
+                exit 0
+                ;;
+              build_failed|update_failed|canceled|deactivated)
+                echo "Deploy falhou no Render (status: $STATUS)"
+                exit 1
+                ;;
+            esac
+
+            sleep 10
+          done
+
+          echo "Timeout: deploy não terminou em 10 minutos."
+          exit 1
 
           
 

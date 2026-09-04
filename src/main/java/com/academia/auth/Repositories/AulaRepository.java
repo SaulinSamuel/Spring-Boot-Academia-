@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,17 +15,13 @@ import com.academia.auth.Models.Aula;
 import com.academia.auth.Models.Usuario;
 import com.academia.auth.Models.enums.StatusAula;
 
-public interface AulaRepository extends JpaRepository<Aula, Long> {
+public interface AulaRepository extends JpaRepository<Aula, Long>,
+JpaSpecificationExecutor<Aula>
+{
     
     Optional<Aula> findTopByInstrutorOrderByIdDesc(Usuario usuario);
 
     Page<Aula> findAllByInstrutor(Usuario instrutor, Pageable pageable);
-
-    @Query("""
-            SELECT a FROM Aula a
-            ORDER BY CASE WHEN a.status = 'PENDENTE' THEN 0 ELSE 1 END, a.dataAula ASC
-            """)
-    Page<Aula> findAllOrdenadaPorRelevancia(Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Query("""

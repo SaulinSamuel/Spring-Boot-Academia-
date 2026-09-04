@@ -3,6 +3,7 @@ package com.academia.auth.Services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.academia.auth.DTOS.Aula.AulaRequestDTO;
 import com.academia.auth.DTOS.Aula.AulaResponseDTO;
@@ -395,10 +397,10 @@ public class AulaServiceTest {
 
             Page<Aula> page = new PageImpl<>(aulas);
 
-            when(aulaRepository.findAllOrdenadaPorRelevancia(pageable))
+            when(aulaRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(page);
 
-            Page<AulaResponseDTO> resultado = aulaService.buscarTodasAulas(pageable);
+            Page<AulaResponseDTO> resultado = aulaService.buscarTodasAulas(null, pageable);
 
             assertThat(resultado.getContent()).extracting(AulaResponseDTO::id)
                 .containsExactlyInAnyOrder(aula.getId(), aula2.getId());

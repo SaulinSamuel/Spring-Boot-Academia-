@@ -4,9 +4,11 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.academia.auth.DTOS.Aula.AulaFilterDTO;
 import com.academia.auth.DTOS.Aula.AulaRequestDTO;
 import com.academia.auth.DTOS.Aula.AulaResponseDTO;
 import com.academia.auth.Exceptions.BusinessException;
@@ -19,6 +21,7 @@ import com.academia.auth.Models.enums.RoleUser;
 import com.academia.auth.Models.enums.StatusAula;
 import com.academia.auth.Repositories.AulaRepository;
 import com.academia.auth.Services.auth.UsuarioAutenticadoService;
+import com.academia.auth.Specifications.AulaSpecification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -132,9 +135,15 @@ public class AulaService {
         return AulaMapper.toDTO(aula);
     }
 
-    public Page<AulaResponseDTO> buscarTodasAulas(Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<AulaResponseDTO> buscarTodasAulas(
+        AulaFilterDTO filter,
+        Pageable pageable) 
+    {
 
-        Page<Aula> aulas = aulaRepository.findAllOrdenadaPorRelevancia(pageable);
+        Specification<Aula> specification = AulaSpecification.filter(filter);
+
+        Page<Aula> aulas = aulaRepository.findAll(specification, pageable);
 
         return aulas
             .map(AulaMapper::toDTO);

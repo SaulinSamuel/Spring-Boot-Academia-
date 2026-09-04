@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.academia.auth.DTOS.Aula.AulaFilterDTO;
 import com.academia.auth.DTOS.Aula.AulaRequestDTO;
 import com.academia.auth.DTOS.Aula.AulaResponseDTO;
 import com.academia.auth.Services.AulaService;
@@ -69,11 +70,12 @@ public class AulaController {
     @PreAuthorize("hasAnyRole('USER', 'FUNIONARIO', 'INSTRUTOR', 'ADMIN')")
     @GetMapping("/buscar/todas")
     public ResponseEntity<Page<AulaResponseDTO>> buscarTodasAulas(
+        AulaFilterDTO filter,
         @PageableDefault(size = 12) Pageable pageable
-    ) 
+    )
     {
 
-        Page<AulaResponseDTO> aulas = aulaService.buscarTodasAulas(pageable);
+        Page<AulaResponseDTO> aulas = aulaService.buscarTodasAulas(filter, pageable);
 
         return ResponseEntity.ok(aulas);
     }

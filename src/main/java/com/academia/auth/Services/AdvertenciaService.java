@@ -44,7 +44,7 @@ public class AdvertenciaService {
 
         Usuario usuarioDestinatario = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFound("Usuário não encontrado!"));
-        
+            
         if (usuario.getRole() == RoleUser.ROLE_USER || 
             usuarioDestinatario.getRole() != RoleUser.ROLE_USER) 
         {

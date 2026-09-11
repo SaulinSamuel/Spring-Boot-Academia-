@@ -18,7 +18,7 @@ public class AdvertenciaSpecification {
             }
 
             return cb.like(
-                cb.lower(root.get("remetente").get("name")),
+                cb.lower(root.get("remetente").get("nome")),
                 "%" + remetente.toLowerCase() + "%"
             );
         };
@@ -32,7 +32,7 @@ public class AdvertenciaSpecification {
             }
 
             return cb.like(
-                cb.lower(root.get("destinatario").get("name")),
+                cb.lower(root.get("destinatario").get("nome")),
                 "%" + destinatario.toLowerCase() + "%"
             );
         };

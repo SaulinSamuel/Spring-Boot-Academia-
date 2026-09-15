@@ -46,7 +46,7 @@ public class AgendamentoController {
         return ResponseEntity.ok(agendamentos);        
     }
 
-    @PreAuthorize("hasRole('INSTRUTOR')")
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/buscar/me")
     public ResponseEntity<Page<AgendamentoResponseDTO>> buscarSeusAgendamentos(
         @PageableDefault(size = 12) Pageable pageable
@@ -56,6 +56,16 @@ public class AgendamentoController {
         Page<AgendamentoResponseDTO> agendamentos = agendamentoService.buscarSeusAgendamentos(pageable);
         
         return ResponseEntity.ok(agendamentos);
+    }
+
+    @PreAuthorize("hasAnyRole('INSTRUTOR', 'FUNCIONARIO', 'ADMIN')")
+    @GetMapping("/{aulaId}/aula")
+    public ResponseEntity<Page<AgendamentoResponseDTO>> buscarAgendamentosPorAula(
+        @PathVariable("aulaId") Long aulaId,
+        @PageableDefault(size = 12, sort = "aula.nome") Pageable pageable
+    ) 
+    {
+        return ResponseEntity.ok(agendamentoService.buscarAgendamentoPorAula(pageable, aulaId));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO', 'INSTRUTOR', 'USER')")

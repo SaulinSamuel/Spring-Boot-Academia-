@@ -147,7 +147,7 @@ public class AulaService {
 
         return aulas
             .map(AulaMapper::toDTO);
-    }
+    }   
 
     public Page<AulaResponseDTO> buscarAulasCriadasPorInstrutor(Pageable pageable) {
 

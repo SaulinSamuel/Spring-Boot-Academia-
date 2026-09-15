@@ -21,6 +21,8 @@ public record AulaResponseDTO(
 
     Integer capacidadeInscricoes,
 
+    Integer inscricoesRestantes,
+
     StatusAula status,
 
     String instrutor

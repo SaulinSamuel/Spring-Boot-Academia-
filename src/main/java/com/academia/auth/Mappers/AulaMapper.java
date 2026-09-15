@@ -28,6 +28,8 @@ public class AulaMapper {
             .horarioInicio(aula.getHorarioInicio())
             .id(aula.getId())
             .instrutor(aula.getInstrutor().getNome())
+            .inscricoesRestantes(aula.getCapacidadeInscricoes() - aula.getQuantidadeInscritos())
+            .inscricoesRestantes(aula.getCapacidadeInscricoes())
             .nome(aula.getNome())
             .status(aula.getStatus())
         .build();

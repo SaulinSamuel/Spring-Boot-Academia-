@@ -101,6 +101,29 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
+    public Page<AgendamentoResponseDTO> buscarAgendamentoPorAula(
+        Pageable pageable,
+        Long aulaId
+    ) 
+    {   
+
+        var usuario = usuarioLogado.usuarioLogado();
+
+        if (usuario.getRole() == RoleUser.ROLE_USER) {
+            throw new BusinessException("Sem permissão para buscar agendamentos por aula!");
+        }
+
+        if (!aulaRepository.existsById(aulaId)) {
+            throw new ResourceNotFound("Aula não encontrada!");
+        }
+
+        Page<Agendamento> agendamentos = agendamentoRepository.findAllByAula_Id(aulaId, pageable);
+
+        return agendamentos
+            .map(AgendamentoMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
     public AgendamentoResponseDTO buscarAgendamentoPorId(Long agendamentoId) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -108,7 +131,10 @@ public class AgendamentoService {
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
             .orElseThrow(() -> new ResourceNotFound("Agendamento não enontrado!"));
         
-        if (!agendamento.getUsuario().getId().equals(usuario.getId())) {
+        boolean isUser = usuario.getRole().equals(RoleUser.ROLE_USER);
+
+        if (isUser && !agendamento.getUsuario().getId().equals(usuario.getId())) 
+        {
             throw new BusinessException("Você não tem permissão para visualizar esse agendamento!");
         }
 

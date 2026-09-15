@@ -26,6 +26,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
         @Param("statusAula") StatusAula statusAula
     );
 
+    Page<Agendamento> findAllByAula_Id(Long aulaId, Pageable pageable);
+
     Page<Agendamento> findAllByUsuario(Usuario usuario, Pageable pageable);
 
 }

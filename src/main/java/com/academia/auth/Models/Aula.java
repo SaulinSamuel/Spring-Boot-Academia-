@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.Formula;
+
 import com.academia.auth.Models.enums.StatusAula;
 
 import jakarta.persistence.CascadeType;
@@ -53,7 +55,17 @@ public class Aula {
     
     @Column(nullable = false)
     private Integer capacidadeInscricoes;
-    
+
+    @Builder.Default
+    @Formula("""
+            (SELECT COUNT(a.id)
+            FROM agendamentos a
+            WHERE a.aula_id = id
+            AND a.status = 'CONFIRMADO'
+            )
+            """)
+    private Integer quantidadeInscritos = 0;
+        
     @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

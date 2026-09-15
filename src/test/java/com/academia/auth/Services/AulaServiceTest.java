@@ -75,6 +75,7 @@ public class AulaServiceTest {
             .dataAula(hoje)
             .horarioInicio(inicio)
             .horarioFim(fim)
+            .quantidadeInscritos(2)
             .instrutor(instrutor)
             .status(StatusAula.PENDENTE)
             .nome("Aula treino inferiores")

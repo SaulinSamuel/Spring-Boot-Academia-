@@ -68,6 +68,7 @@ public class AgendamentoService {
         agendamento.setStatus(StatusAgendamento.CONFIRMADO);
         agendamento.setUsuario(usuario);
         agendamento.setDataAgendamento(agora);
+        aula.getAgendamentos().add(agendamento);
 
         agendamentoRepository.save(agendamento);
 

@@ -2,6 +2,7 @@ package com.academia.auth.Services;
 
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.academia.auth.DTOS.Aula.AulaFilterDTO;
 import com.academia.auth.DTOS.Aula.AulaRequestDTO;
 import com.academia.auth.DTOS.Aula.AulaResponseDTO;
+import com.academia.auth.Events.AulaCanceladaEvent;
+import com.academia.auth.Events.AulaConfirmadaEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.AulaException;
 import com.academia.auth.Exceptions.ResourceNotFound;
@@ -32,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AulaService {
     
     private final AulaRepository aulaRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final UsuarioAutenticadoService usuarioLogado;
 
     @Transactional
@@ -107,6 +111,10 @@ public class AulaService {
 
         aula.setStatus(StatusAula.CONFIRMADA);
 
+        applicationEventPublisher.publishEvent(
+            new AulaConfirmadaEvent(aula.getId())
+        );
+
         aulaRepository.save(aula);
 
         return AulaMapper.toDTO(aula);
@@ -131,6 +139,10 @@ public class AulaService {
         aula.setStatus(StatusAula.CANCELADA);
 
         aulaRepository.save(aula);
+
+        applicationEventPublisher.publishEvent(
+            new AulaCanceladaEvent(aula.getId())
+        );
 
         return AulaMapper.toDTO(aula);
     }

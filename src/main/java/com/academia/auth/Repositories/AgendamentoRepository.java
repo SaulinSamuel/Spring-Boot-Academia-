@@ -1,5 +1,7 @@
 package com.academia.auth.Repositories;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,6 +26,15 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
         @Param("usuarioId") Long usuarioId,
         @Param("aulaId") Long aulaId,
         @Param("statusAula") StatusAula statusAula
+    );
+
+    @Query("""
+            SELECT a.usuario
+            FROM Agendamento a
+            WHERE a.aula.id = :aulaId
+            """)
+    List<Usuario> findUsuariosByAulaIdAndStatus(
+        @Param("aulaId") Long aulaId
     );
 
     Page<Agendamento> findAllByAula_Id(Long aulaId, Pageable pageable);

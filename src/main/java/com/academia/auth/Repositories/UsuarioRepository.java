@@ -1,5 +1,6 @@
 package com.academia.auth.Repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -17,6 +18,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByTelefone(String telefone);
 
     Long countByRole(RoleUser role);
+
+    List<Usuario> findAllByAgendamentos_Id(Long agendamentoId);
 
     Page<Usuario> findAllByNomeContainingIgnoreCase(String nome, Pageable pageable);
 

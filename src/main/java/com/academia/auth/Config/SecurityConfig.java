@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/avaliacao-fisica/**").authenticated()
                 .requestMatchers("/aula/**").authenticated()
                 .requestMatchers("/agendamento/**").authenticated()
+                .requestMatchers("/notificacao/**").authenticated()
                 .anyRequest().authenticated()
             )
 

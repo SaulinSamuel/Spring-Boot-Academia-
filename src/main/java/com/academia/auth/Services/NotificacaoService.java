@@ -50,6 +50,25 @@ public class NotificacaoService {
         notificacaoRepository.saveAll(notificacoes);
     }
 
+    @Transactional
+    public NotificacaoResponseDTO marcarNotificacaoComoLida(Long notificacaoId) {
+
+        var usuario = usuarioLogado.usuarioLogado();
+
+        var notificacao = notificacaoRepository.findById(notificacaoId)
+            .orElseThrow(() -> new ResourceNotFound("Notificação não encontrada!"));
+
+        if (!notificacao.getUsuario().getId().equals(usuario.getId())) {
+            throw new BusinessException("Você não tem permissão de ler esta notificação!");
+        }
+        
+        notificacao.setLida(true);
+
+        notificacaoRepository.save(notificacao);
+
+        return notificacaoMapper.toDTO(notificacao);
+    }
+
     @Transactional(readOnly = true)
     public Page<NotificacaoResponseDTO> buscarMinhasNotificacoes(Pageable pageable) {
 

@@ -10,7 +10,9 @@ public record NotificacaoResponseDTO(
 
     String mensagem,
 
-    TipoNotificacao tipoNotificacao
+    TipoNotificacao tipoNotificacao,
+
+    boolean lida
 
 ) {
     

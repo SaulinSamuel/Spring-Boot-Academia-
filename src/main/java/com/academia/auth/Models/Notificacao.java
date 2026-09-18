@@ -46,4 +46,8 @@ public class Notificacao {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean lida = false;
+
 }

@@ -1,0 +1,9 @@
+ALTER TABLE notificacoes
+ADD COLUMN lida BOOLEAN;
+
+UPDATE notificacoes
+SET lida = FALSE
+WHERE lida IS NULL;
+
+ALTER TABLE notificacoes
+MODIFY COLUMN lida BOOLEAN NOT NULL DEFAULT FALSE;

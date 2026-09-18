@@ -97,6 +97,27 @@ public class MensalidadeRepositoryTest {
         assertEquals(mensalidade2.getId(), resultado.get().getId());
     }
 
+    @Test 
+    void deveRetornarUsuariosComMensalidadeDoisDiasParaVencer() {
+
+        LocalDate dataVencimento = LocalDate.now().plusDays(2);
+
+        var usuario = criarUsuario();
+
+        var mensalidade = criarMensalidadePendente(usuario);
+        mensalidade.setDataVencimento(dataVencimento);
+
+        usuarioRepository.save(usuario);
+
+        mensalidadeRepository.save(mensalidade);
+
+        List<Usuario> usuarios = mensalidadeRepository.findUsuariosPorDataVencimento(dataVencimento);
+
+        assertThat(usuarios).isNotEmpty();
+        assertThat(usuarios).extracting(Usuario::getId)
+            .contains(usuario.getId());
+    }
+
     @Test
     void deveRetornarVazioSeUltimaMensalidadePorUsuarioNaoExistir() {
 

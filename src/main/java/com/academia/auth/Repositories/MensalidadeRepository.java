@@ -2,6 +2,7 @@ package com.academia.auth.Repositories;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -20,6 +21,15 @@ public interface MensalidadeRepository extends JpaRepository<Mensalidade, Long>,
 JpaSpecificationExecutor<Mensalidade> {
     
     Optional<Mensalidade> findTopByUsuarioOrderByIdDesc(Usuario usuario);
+
+    @Query("""
+            SELECT m.usuario
+            FROM Mensalidade m
+            WHERE m.dataVencimento = :dataVencimento
+            """)
+    List<Usuario> findUsuariosPorDataVencimento(
+        @Param("dataVencimento") LocalDate dataVencimento
+    );
 
     Long countByStatus(StatusMensalidade status);
 

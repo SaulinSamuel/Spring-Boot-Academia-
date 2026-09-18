@@ -33,7 +33,8 @@ public class NotificacaoMapper {
             notificacao.getId(),
             notificacao.getTitulo(),
             notificacao.getMensagem(),
-            notificacao.getTipoNotificacao()
+            notificacao.getTipoNotificacao(),
+            notificacao.isLida()
         );
 
         return dto;

@@ -1,5 +1,6 @@
 package com.academia.auth.DTOS.Notificacao;
 
+import com.academia.auth.Models.Notificacao;
 import com.academia.auth.Models.enums.TipoNotificacao;
 
 public record NotificacaoResponseDTO(
@@ -14,6 +15,16 @@ public record NotificacaoResponseDTO(
 
     boolean lida
 
-) {
+) 
+{
     
+    public static NotificacaoResponseDTO from(Notificacao notificacao) {
+        return new NotificacaoResponseDTO(
+            notificacao.getId(), 
+            notificacao.getTitulo(), 
+            notificacao.getMensagem(), 
+            notificacao.getTipoNotificacao(),
+            notificacao.isLida()      
+        );
+    }
 }

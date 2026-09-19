@@ -38,6 +38,10 @@ public class NotificacaoService {
     )
     {
 
+        if (usuarios.isEmpty()) {
+            throw new ResourceNotFound("Nenhum usuário encontrado!");
+        }
+
         List<Notificacao> notificacoes = usuarios.stream()
             .map(usuario -> notificacaoMapper.toEntity(
                 usuario, 
@@ -92,7 +96,7 @@ public class NotificacaoService {
             throw new BusinessException("Você não tem permissão de visualizar essa notificação!");
         }
 
-        return notificacaoMapper.toDTO(notificacao);
+        return NotificacaoResponseDTO.from(notificacao);
     }
 
     @Transactional 

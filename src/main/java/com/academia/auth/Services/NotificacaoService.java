@@ -38,6 +38,10 @@ public class NotificacaoService {
     )
     {
 
+        if (usuarios.isEmpty()) {
+            throw new ResourceNotFound("Nenhum usuário encontrado!");
+        }
+
         List<Notificacao> notificacoes = usuarios.stream()
             .map(usuario -> notificacaoMapper.toEntity(
                 usuario, 
@@ -48,6 +52,25 @@ public class NotificacaoService {
         .toList();
 
         notificacaoRepository.saveAll(notificacoes);
+    }
+
+    @Transactional
+    public NotificacaoResponseDTO marcarNotificacaoComoLida(Long notificacaoId) {
+
+        var usuario = usuarioLogado.usuarioLogado();
+
+        var notificacao = notificacaoRepository.findById(notificacaoId)
+            .orElseThrow(() -> new ResourceNotFound("Notificação não encontrada!"));
+
+        if (!notificacao.getUsuario().getId().equals(usuario.getId())) {
+            throw new BusinessException("Você não tem permissão de ler esta notificação!");
+        }
+        
+        notificacao.setLida(true);
+
+        notificacaoRepository.save(notificacao);
+
+        return notificacaoMapper.toDTO(notificacao);
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +96,7 @@ public class NotificacaoService {
             throw new BusinessException("Você não tem permissão de visualizar essa notificação!");
         }
 
-        return notificacaoMapper.toDTO(notificacao);
+        return NotificacaoResponseDTO.from(notificacao);
     }
 
     @Transactional 

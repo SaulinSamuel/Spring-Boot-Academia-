@@ -112,7 +112,7 @@ public class AulaService {
         aula.setStatus(StatusAula.CONFIRMADA);
 
         applicationEventPublisher.publishEvent(
-            new AulaConfirmadaEvent(aula.getId())
+            new AulaConfirmadaEvent(aula.getId(), aula.getNome(), aula.getDataAula())
         );
 
         aulaRepository.save(aula);
@@ -141,7 +141,7 @@ public class AulaService {
         aulaRepository.save(aula);
 
         applicationEventPublisher.publishEvent(
-            new AulaCanceladaEvent(aula.getId())
+            new AulaCanceladaEvent(aula.getId(), aula.getNome(), aula.getDataAula())
         );
 
         return AulaMapper.toDTO(aula);
@@ -160,7 +160,8 @@ public class AulaService {
         return aulas
             .map(AulaMapper::toDTO);
     }   
-
+    
+    @Transactional(readOnly = true)
     public Page<AulaResponseDTO> buscarAulasCriadasPorInstrutor(Pageable pageable) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
@@ -176,6 +177,7 @@ public class AulaService {
             .map(AulaMapper::toDTO);
     }
 
+    @Transactional(readOnly = true)
     public AulaResponseDTO buscarAulaPorId(Long id) {
 
         Aula aula = aulaRepository.findById(id)

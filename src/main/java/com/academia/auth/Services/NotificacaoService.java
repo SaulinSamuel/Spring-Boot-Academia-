@@ -55,7 +55,7 @@ public class NotificacaoService {
     }
 
     @Transactional
-    public NotificacaoResponseDTO marcarNotificacaoComoLida(Long notificacaoId) {
+    public void marcarNotificacaoComoLida(Long notificacaoId) {
 
         var usuario = usuarioLogado.usuarioLogado();
 
@@ -69,8 +69,14 @@ public class NotificacaoService {
         notificacao.setLida(true);
 
         notificacaoRepository.save(notificacao);
+    }
 
-        return notificacaoMapper.toDTO(notificacao);
+    @Transactional 
+    public void marcarTodasNotificacoesComoLida() {
+
+        var usuario = usuarioLogado.usuarioLogado();
+
+        notificacaoRepository.marcarTodasNotificacoesComoLida(usuario.getId());
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +87,7 @@ public class NotificacaoService {
         Page<Notificacao> notificacoes = notificacaoRepository.findAllByUsuario(usuario, pageable);
 
         return notificacoes
-            .map(notificacaoMapper::toDTO);
+            .map(NotificacaoResponseDTO::from);
     }
 
     @Transactional 

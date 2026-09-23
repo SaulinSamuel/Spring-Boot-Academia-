@@ -26,11 +26,22 @@ public class NotificacaoController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUTOR', 'FUNCIONARIO', 'USER')")
     @PatchMapping("/{notificacaoId}/ler")
-    public ResponseEntity<NotificacaoResponseDTO> marcarNotificacaoComoLida(
+    public ResponseEntity<Void> marcarNotificacaoComoLida(
         @PathVariable("notificacaoId") Long notificacaoId
     ) 
     {
-        return ResponseEntity.ok(notificacaoService.marcarNotificacaoComoLida(notificacaoId));
+        notificacaoService.marcarNotificacaoComoLida(notificacaoId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUTOR', 'FUNCIONARIO', 'USER')")
+    @PatchMapping("/ler/todas")
+    public ResponseEntity<Void> marcarTodasNotificacoesComoLida() {
+
+        notificacaoService.marcarTodasNotificacoesComoLida();
+
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUTOR', 'FUNCIONARIO', 'USER')")

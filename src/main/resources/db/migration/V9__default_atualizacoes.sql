@@ -1,0 +1,2 @@
+ALTER TABLE mensalidade
+MODIFY COLUMN atualizacoes INT NOT NULL DEFAULT 0;

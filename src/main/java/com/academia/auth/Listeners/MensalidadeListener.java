@@ -52,6 +52,8 @@ public class MensalidadeListener {
             usuario.setAcessosAcademia(acessosAcademia);
             
             acessoAcademiaRepository.save(acessosAcademia);
+            
+            log.info("Acesso da academia criado e salvo para usuário {}", usuario.getEmail());
         }
     }
 

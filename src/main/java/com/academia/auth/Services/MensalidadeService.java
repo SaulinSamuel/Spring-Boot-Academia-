@@ -66,26 +66,16 @@ public class MensalidadeService {
 
         BigDecimal valor = validarValorMensalidade(dto.getDiasTreino());
 
-        Mensalidade mensalidade = MensalidadeMapper.toEntity(dto);
+        Mensalidade mensalidade = new Mensalidade();
+        mensalidade.criar(valor, hoje, dto.getDiasTreino(), usuario);
+
+        mensalidadeRepository.save(mensalidade);
 
         applicationEventPublisher.publishEvent(
             new MensalidadeCriadaEvent(usuario)
         );
 
-        mensalidade.setValor(valor);
-        mensalidade.setDataCriacao(hoje);
-        mensalidade.setDataVencimento(hoje.plusMonths(1));
-        mensalidade.setUsuario(usuario);
-        mensalidade.setDiasTreino(dto.getDiasTreino());
-        mensalidade.setDataPagamento(null);
-        mensalidade.setDataCancelamento(null);
-        mensalidade.setAtualizacoes(0);
-        mensalidade.setStatus(StatusMensalidade.PENDENTE);
-
-        mensalidadeRepository.save(mensalidade);
-
         log.info("Mensalidade criada e salva para usuário {}", usuario.getEmail());
-        log.info("Acesso da academia criado e salvo para usuário {}", usuario.getEmail());
 
         return MensalidadeMapper.toDTO(mensalidade);
     }
@@ -99,20 +89,9 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
-        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
-            throw new BusinessException("Apenas mensalidades pendentes podem ser alteradas!");
-        }
-
-        if (mensalidade.getAtualizacoes() >= 1) {
-            log.info("Usuário {} tentou atualizar mensalidade mais de uma vez no mês", usuario.getEmail());
-            throw new BusinessException("Você só pode atualizar sua mensalidade 1 vez por mês!");
-        }
-
         BigDecimal valor = validarValorMensalidade(dto.getDiasTreino());
 
-        mensalidade.setDiasTreino(dto.getDiasTreino());
-        mensalidade.setValor(valor);
-        mensalidade.setAtualizacoes(1);
+        mensalidade.atualizar(dto.getDiasTreino(), valor);
 
         mensalidadeRepository.save(mensalidade);
         log.info("Mensalidade do usuário {} atualizada!", usuario.getEmail());
@@ -183,14 +162,7 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
         
-        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE && 
-            mensalidade.getStatus() != StatusMensalidade.ATRASADA) {
-            log.warn("Usuário {} tentou pagar mensalidade {} já paga ou cancelada!", usuario.getEmail(), mensalidade.getId());
-            throw new BusinessException("Apenas mensalidades pendentes(ou atrasadas) podem ser pagas!");
-        }
-
-        mensalidade.setStatus(StatusMensalidade.PAGA);
-        mensalidade.setDataPagamento(LocalDate.now());
+        mensalidade.pagar();
         
         mensalidadeRepository.save(mensalidade);
 
@@ -212,13 +184,7 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
-        if (mensalidade.getStatus() != StatusMensalidade.PENDENTE) {
-            log.warn("Usuário {} tentou cancelar mensalidade não pendente!", usuario.getEmail());
-            throw new BusinessException("Apenas mensalidades pendentes podem ser canceladas!");
-        }
-
-        mensalidade.setStatus(StatusMensalidade.CANCELADA);
-        mensalidade.setDataCancelamento(LocalDate.now());     
+        mensalidade.cancelar();     
 
         mensalidadeRepository.save(mensalidade);
 
@@ -262,7 +228,7 @@ public class MensalidadeService {
     }
 
     @Transactional
-    public MensalidadeResponseDTO gerarProximaMensalidade(Mensalidade mensalidade) {
+    public void gerarProximaMensalidade(Mensalidade mensalidade) {
 
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Nova mensalidade de usuário {} sendo gerada", usuario.getEmail());
@@ -286,8 +252,6 @@ public class MensalidadeService {
 
         mensalidadeRepository.save(mensalidadeNova);
         log.info("Nova mensalidade após pagamento de usuário {} criada", usuario.getEmail());
-        
-        return MensalidadeMapper.toDTO(mensalidadeNova); 
     }
 
     private BigDecimal validarValorMensalidade(Integer diasTreino) {

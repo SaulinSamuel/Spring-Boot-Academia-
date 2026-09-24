@@ -13,8 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeFilterDatesDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeRequestDTO;
 import com.academia.auth.DTOS.Mensalidade.MensalidadeResponseDTO;
+import com.academia.auth.Events.MensalidadeCanceladaEvent;
 import com.academia.auth.Events.MensalidadeCriadaEvent;
-import com.academia.auth.Events.MensalidadeStatusAlteradoEvent;
+import com.academia.auth.Events.MensalidadePagaEvent;
 import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Exceptions.ResourceNotFound;
 import com.academia.auth.Mappers.MensalidadeMapper;
@@ -193,9 +194,7 @@ public class MensalidadeService {
         
         mensalidadeRepository.save(mensalidade);
 
-        applicationEventPublisher.publishEvent(
-            new MensalidadeStatusAlteradoEvent(mensalidade)
-        );
+        applicationEventPublisher.publishEvent(new MensalidadePagaEvent(mensalidade.getId()));
 
         log.info("Mensalidade {} salva e paga", mensalidade.getId());
         
@@ -235,9 +234,7 @@ public class MensalidadeService {
             log.info("Acesso {} deletado", acessoAcademia.getId());
         }
         
-        applicationEventPublisher.publishEvent(
-            new MensalidadeStatusAlteradoEvent(mensalidade)
-        );
+        applicationEventPublisher.publishEvent(new MensalidadeCanceladaEvent(mensalidade.getId()));
         
         return MensalidadeMapper.toDTO(mensalidade);
     }

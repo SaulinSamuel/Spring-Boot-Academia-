@@ -30,7 +30,7 @@ JpaSpecificationExecutor<Advertencia>
 
     Page<Advertencia> findByDestinatarioNomeContainingIgnoreCase(String nome, Pageable pageable);  
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("""
             DELETE FROM Advertencia a

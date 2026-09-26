@@ -3,6 +3,7 @@ package com.academia.auth.Models;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.academia.auth.Exceptions.BusinessException;
 import com.academia.auth.Models.enums.StatusMensalidade;
 
 import jakarta.persistence.Column;
@@ -49,7 +50,8 @@ public class Mensalidade {
 
     private LocalDate dataCancelamento;
 
-    private Integer atualizacoes;
+    @Builder.Default
+    private Integer atualizacoes = 0;
 
     @Column(nullable = false)
     private LocalDate dataVencimento;
@@ -61,5 +63,85 @@ public class Mensalidade {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    public void criar(BigDecimal valor, LocalDate hoje, Integer diasTreino, Usuario usuario) {
+
+        this.setValor(valor);
+        this.setDataCriacao(hoje);
+        this.setDataVencimento(hoje.plusMonths(1));
+        this.setUsuario(usuario);
+        this.setDiasTreino(diasTreino);
+        this.setDataPagamento(null);
+        this.setDataCancelamento(null);
+        this.setAtualizacoes(0);
+        this.setStatus(StatusMensalidade.PENDENTE);
+    }
+
+    public void atualizar(Integer diasTreino, BigDecimal valor) {
+
+        if (status != StatusMensalidade.PENDENTE) {
+            throw new BusinessException("Apenas mensalidades pendentes podem ser alteradas!");
+        }
+
+        if (atualizacoes >= 1) {
+            throw new BusinessException("Você só pode atualizar sua mensalidade 1 vez por mês!");
+        }
+
+        this.setDiasTreino(diasTreino);
+        this.setValor(valor);
+        this.setAtualizacoes(1);    
+    }
+
+    public Mensalidade gerarProxima() {
+
+        if (status != StatusMensalidade.PAGA) {
+            throw new BusinessException("Mensalidade ainda não paga!");
+        }
+
+        Mensalidade mensalidadeNova = new Mensalidade();
+
+        mensalidadeNova.setDataCriacao(LocalDate.now());
+        mensalidadeNova.setDataVencimento(dataVencimento.plusMonths(1));
+        mensalidadeNova.setDiasTreino(this.getDiasTreino());
+        mensalidadeNova.setStatus(StatusMensalidade.PENDENTE);
+        mensalidadeNova.setValor(this.getValor());
+        mensalidadeNova.setUsuario(usuario);
+        mensalidadeNova.setAtualizacoes(0);
+
+        return mensalidadeNova;
+    }
+
+    public void pagar() {
+
+        if (status != StatusMensalidade.PENDENTE && 
+            status != StatusMensalidade.ATRASADA) {
+            
+            throw new BusinessException("Apenas mensalidades pendentes(ou atrasadas) podem ser pagas!");
+        }
+
+        this.setStatus(StatusMensalidade.PAGA);
+        this.setDataPagamento(LocalDate.now());
+    }
+
+    public void cancelar() {
+
+        if (status != StatusMensalidade.PENDENTE) {
+            
+            throw new BusinessException("Apenas mensalidades pendentes podem ser canceladas!");
+        }
+
+        this.setStatus(StatusMensalidade.CANCELADA);
+        this.setDataCancelamento(LocalDate.now());
+    }
+
+    public void deletar() {
+
+        if (status != StatusMensalidade.PAGA &&
+            status != StatusMensalidade.CANCELADA) 
+        {
+
+            throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
+        }
+    }
 
 }

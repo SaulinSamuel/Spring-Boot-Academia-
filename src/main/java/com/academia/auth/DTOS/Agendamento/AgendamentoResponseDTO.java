@@ -8,6 +8,7 @@ public record AgendamentoResponseDTO(
     String instrutor,
     String aluno,
     StatusAgendamento status
-) {
+) 
+{
     
 }

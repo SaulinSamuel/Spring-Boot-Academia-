@@ -17,4 +17,16 @@ public class UsuarioFactoryTest {
         .build();
     }
 
+
+    public Usuario criarUsuarioSemId() {
+
+        return Usuario.builder()
+            .nome("teste")
+            .email("teste@gmail.com")
+            .telefone("(94) 94724-8524")
+            .senha("091812")
+            .role(RoleUser.ROLE_USER)
+        .build();
+    }
+
 }

@@ -14,7 +14,7 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> 
     
     Page<Notificacao> findAllByUsuario(Usuario usuario, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
             UPDATE Notificacao n
             SET n.lida = true

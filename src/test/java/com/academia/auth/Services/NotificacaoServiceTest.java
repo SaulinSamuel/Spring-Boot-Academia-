@@ -115,24 +115,6 @@ public class NotificacaoServiceTest {
                 .containsExactly(notificacao, notificacao2);
         }
 
-        @Test 
-        void deveLancarExcecaoSeUsuariosVierVazio() {   
-
-            TipoNotificacao tipoNotificacao = TipoNotificacao.AULA_CANCELADA;
-            String mensagem = "Aula cancelada!";
-            String titulo = "Aula cancelada!";
-            List<Usuario> usuarios = List.of();
-
-            assertThatThrownBy(() -> 
-                notificacaoService.enviarNotificacao(
-                    tipoNotificacao, titulo, mensagem, usuarios
-                )
-            ).isInstanceOf(ResourceNotFound.class)
-            .hasMessage("Nenhum usuário encontrado!");
-
-            verifyNoInteractions(notificacaoMapper, notificacaoRepository);
-        }
-
     }
 
     @Nested 

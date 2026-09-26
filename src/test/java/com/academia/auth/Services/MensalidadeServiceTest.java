@@ -648,12 +648,7 @@ public class MensalidadeServiceTest {
             mensalidade.setId(1L);
             mensalidade.setStatus(StatusMensalidade.PAGA);
             
-            MensalidadeResponseDTO resultado = mensalidadeService.gerarProximaMensalidade(mensalidade);
-
-            assertNotNull(resultado);
-
-            assertEquals(StatusMensalidade.PENDENTE, resultado.getStatus());
-            assertEquals(mensalidade.getDiasTreino(), resultado.getDiasTreino());
+            mensalidadeService.gerarProximaMensalidade(mensalidade);
 
             ArgumentCaptor<Mensalidade> captor = ArgumentCaptor.forClass(Mensalidade.class);
 

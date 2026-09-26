@@ -92,6 +92,25 @@ public class Mensalidade {
         this.setAtualizacoes(1);    
     }
 
+    public Mensalidade gerarProxima() {
+
+        if (status != StatusMensalidade.PAGA) {
+            throw new BusinessException("Mensalidade ainda não paga!");
+        }
+
+        Mensalidade mensalidadeNova = new Mensalidade();
+
+        mensalidadeNova.setDataCriacao(LocalDate.now());
+        mensalidadeNova.setDataVencimento(dataVencimento.plusMonths(1));
+        mensalidadeNova.setDiasTreino(this.getDiasTreino());
+        mensalidadeNova.setStatus(StatusMensalidade.PENDENTE);
+        mensalidadeNova.setValor(this.getValor());
+        mensalidadeNova.setUsuario(usuario);
+        mensalidadeNova.setAtualizacoes(0);
+
+        return mensalidadeNova;
+    }
+
     public void pagar() {
 
         if (status != StatusMensalidade.PENDENTE && 
@@ -113,6 +132,16 @@ public class Mensalidade {
 
         this.setStatus(StatusMensalidade.CANCELADA);
         this.setDataCancelamento(LocalDate.now());
+    }
+
+    public void deletar() {
+
+        if (status != StatusMensalidade.PAGA &&
+            status != StatusMensalidade.CANCELADA) 
+        {
+
+            throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
+        }
     }
 
 }

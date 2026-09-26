@@ -39,7 +39,8 @@ public class NotificacaoService {
     {
 
         if (usuarios.isEmpty()) {
-            throw new ResourceNotFound("Nenhum usuário encontrado!");
+            log.info("Nenhum usuário para notificar!");
+            return;
         }
 
         List<Notificacao> notificacoes = usuarios.stream()

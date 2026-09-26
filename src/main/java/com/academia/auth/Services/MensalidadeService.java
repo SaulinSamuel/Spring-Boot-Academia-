@@ -40,7 +40,6 @@ public class MensalidadeService {
     private final MensalidadeRepository mensalidadeRepository;
     private final UsuarioAutenticadoService usuarioLogado;
     private final AcessoAcademiaRepository academiaRepository;
-
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
@@ -214,13 +213,7 @@ public class MensalidadeService {
         Mensalidade mensalidade = mensalidadeRepository.findTopByUsuarioOrderByIdDesc(usuario)
             .orElseThrow(() -> new ResourceNotFound("Mensalidade não encontrada!"));
 
-        if (mensalidade.getStatus() != StatusMensalidade.PAGA &&
-            mensalidade.getStatus() != StatusMensalidade.CANCELADA) 
-        {
-
-            log.warn("Usuário {} tentou excluir mensalidade {} atrasada ou pendente", usuario.getEmail(), mensalidade.getId());
-            throw new BusinessException("Apenas mensalidades pagas(ou canceladas) podem ser excluídas!");    
-        }
+        mensalidade.deletar();
 
         mensalidadeRepository.delete(mensalidade);
 
@@ -233,22 +226,7 @@ public class MensalidadeService {
         Usuario usuario = usuarioLogado.usuarioLogado();
         log.info("Nova mensalidade de usuário {} sendo gerada", usuario.getEmail());
 
-        if (mensalidade.getStatus() != StatusMensalidade.PAGA) {
-            log.warn("Mensalidade de usuário {} ainda não foi paga", usuario.getEmail());
-            throw new BusinessException("Mensalidade ainda não paga!");
-        }
-
-        Mensalidade mensalidadeNova = new Mensalidade();
-
-        mensalidadeNova.setDataCriacao(LocalDate.now());
-        mensalidadeNova.setDataPagamento(null);
-        mensalidadeNova.setDataVencimento(mensalidade.getDataVencimento().plusMonths(1));
-        mensalidadeNova.setDataCancelamento(null);
-        mensalidadeNova.setDiasTreino(mensalidade.getDiasTreino());
-        mensalidadeNova.setStatus(StatusMensalidade.PENDENTE);
-        mensalidadeNova.setValor(mensalidade.getValor());
-        mensalidadeNova.setUsuario(usuario);
-        mensalidadeNova.setAtualizacoes(0);
+        Mensalidade mensalidadeNova = mensalidade.gerarProxima();
 
         mensalidadeRepository.save(mensalidadeNova);
         log.info("Nova mensalidade após pagamento de usuário {} criada", usuario.getEmail());

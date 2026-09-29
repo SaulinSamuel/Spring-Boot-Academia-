@@ -2,31 +2,27 @@ package com.academia.auth.DTOS.Dashboard;
 
 import java.math.BigDecimal;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+public record DashboardResponseDTO(
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class DashboardResponseDTO {
-    
-    private Long quantidadeAlunos;
+    Long quantidadeAlunos,
 
-    private Long mensalidadesPendentes;
+    Long mensalidadesPendentes,
 
-    private Long mensalidadesPagas;
+    Long mensalidadesPagas,
 
-    private Long mensalidadesCanceladas;
+    Long mensalidadesCanceladas,
 
-    private BigDecimal faturamentoTotal;
+    BigDecimal faturamentoTotal,
 
-    private Long quantidadeFuncionarios;
+    Long quantidadeFuncionarios,
 
-    private Long acessosSemana;
+    Long acessosSemana,
+
+    Double mediaDiasDeAcesso
+
+)
+{
 
 }
+    
+

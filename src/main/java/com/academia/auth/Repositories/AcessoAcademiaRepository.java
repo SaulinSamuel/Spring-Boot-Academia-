@@ -20,5 +20,11 @@ public interface AcessoAcademiaRepository extends JpaRepository<AcessoAcademia, 
             """)
     Long somarDiasAcessadosSemana();
 
+    @Query("""
+            SELECT COALESCE(AVG(a.diasAcesso), 0.0)
+            FROM AcessoAcademia a
+            """)
+    Double mediaDiasAcesso();
+
     Page<AcessoAcademia> findByNomeContainingIgnoreCase(Pageable pageable, String nome);
 }

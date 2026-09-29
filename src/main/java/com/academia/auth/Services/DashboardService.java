@@ -40,11 +40,6 @@ public class DashboardService {
         LocalDate inicio = LocalDate.now().withDayOfMonth(1);
         LocalDate fim = inicio.withDayOfMonth(inicio.lengthOfMonth());
 
-        Long quantidadeAlunos = usuarioRepository.countByRole(RoleUser.ROLE_USER);
-        Long mensalidadesPendentes = mensalidadeRepository.countByStatus(StatusMensalidade.PENDENTE);
-        Long mensalidadesPagas = mensalidadeRepository.countByStatus(StatusMensalidade.PAGA);
-        Long mensalidadesCanceladas = mensalidadeRepository.countByStatus(StatusMensalidade.CANCELADA);
-
         BigDecimal faturamento = Optional.ofNullable(
             mensalidadeRepository.somarValorPorPeriodo(StatusMensalidade.PAGA, 
                 inicio, 
@@ -54,16 +49,22 @@ public class DashboardService {
         
         Long quantidadeFuncionarios = usuarioRepository.countByRole(RoleUser.ROLE_FUNCIONARIO);
         Long acessosSemana = acessoAcademiaRepository.somarDiasAcessadosSemana();
+        Long quantidadeAlunos = usuarioRepository.countByRole(RoleUser.ROLE_USER);
+        Long mensalidadesPendentes = mensalidadeRepository.countByStatus(StatusMensalidade.PENDENTE);
+        Long mensalidadesPagas = mensalidadeRepository.countByStatus(StatusMensalidade.PAGA);
+        Long mensalidadesCanceladas = mensalidadeRepository.countByStatus(StatusMensalidade.CANCELADA);
+        Double mediaDiasDeAcesso = acessoAcademiaRepository.mediaDiasAcesso();
 
-        DashboardResponseDTO dashboard = DashboardResponseDTO.builder()
-            .acessosSemana(acessosSemana)
-            .faturamentoTotal(faturamento)
-            .mensalidadesPagas(mensalidadesPagas)
-            .mensalidadesPendentes(mensalidadesPendentes)
-            .mensalidadesCanceladas(mensalidadesCanceladas)
-            .quantidadeAlunos(quantidadeAlunos)
-            .quantidadeFuncionarios(quantidadeFuncionarios)
-        .build();
+        DashboardResponseDTO dashboard = new DashboardResponseDTO(
+            quantidadeAlunos,
+            mensalidadesPendentes,
+            mensalidadesPagas,
+            mensalidadesCanceladas,
+            faturamento,
+            quantidadeFuncionarios,
+            acessosSemana,
+            mediaDiasDeAcesso
+        );
 
         return dashboard;
     }
